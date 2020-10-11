@@ -65,4 +65,5 @@ def create_tables():
         ])
 
 if __name__ == "__main__":
+    # Running: python -m digital_library.db.db
     create_tables()
