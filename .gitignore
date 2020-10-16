@@ -2,6 +2,6 @@ __PYCACHE__
 __pycache__
 *.pyc
 .idea
-db.sqlite
-digital_library/app.py
-digital_library/views/
+
+/data/*
+!/data/.gitkeep
