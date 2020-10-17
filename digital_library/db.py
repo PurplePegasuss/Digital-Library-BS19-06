@@ -7,6 +7,8 @@ from digital_library.app import app, admin
 
 db_wrapper = FlaskDB(app)
 database = db_wrapper.database
+
+
 # TODO: add types validation
 
 
@@ -68,17 +70,8 @@ class ADMIN_RIGHTS(BaseModel):
     users = ManyToManyField(USER, backref='rights')
 
 
-class USER_AdminView(ModelView):
-    inline_models = (ADMIN_RIGHTS.users.get_through_model(),)
-
-
-USER.admin_view = USER_AdminView
-
-
 class MATERIAL_AdminView(ModelView):
-    inline_models = (MATERIAL.tags.get_through_model(),
-                     MATERIAL.authors.get_through_model(),
-                     ATTACHMENT, COMMENT, REVIEW)
+    inline_models = (ATTACHMENT, COMMENT, REVIEW)
 
 
 MATERIAL.admin_view = MATERIAL_AdminView
@@ -96,12 +89,18 @@ tables = [
     ADMIN_RIGHTS.users.get_through_model(),
 ]
 
-admin_views = [
-    x.admin_view(x) for x in tables if getattr(x, 'admin_view', None)
-]
 
-for view in admin_views:
-    admin.add_view(view)
+def init_flask_admin():
+    admin_views = [
+        x.admin_view(x) for x in tables if getattr(x, 'admin_view', None)
+    ]
+    admin_views.extend([
+        ModelView(MATERIAL.tags.get_through_model()),
+        ModelView(MATERIAL.authors.get_through_model()),
+        ModelView(ADMIN_RIGHTS.users.get_through_model()),
+    ])
+    for view in admin_views:
+        admin.add_view(view)
 
 
 def create_tables():
@@ -109,6 +108,6 @@ def create_tables():
         database.create_tables(tables)
 
 
-if __name__ == "__main__":
-    # Running: python -m digital_library.db
-    create_tables()
+create_tables()
+
+init_flask_admin()
