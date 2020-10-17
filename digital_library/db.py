@@ -7,6 +7,7 @@ from digital_library.app import app, admin
 
 db_wrapper = FlaskDB(app)
 database = db_wrapper.database
+# TODO: add types validation
 
 
 class BaseModel(db_wrapper.Model):
@@ -32,6 +33,7 @@ class USER(BaseModel):
 
 class MATERIAL(BaseModel):
     Type = TextField()
+    # available types for now: educational
     Description = TextField(default='')
     tags = ManyToManyField(TAG, backref='materials')  # TAGGED_WITH
     authors = ManyToManyField(
@@ -47,6 +49,7 @@ class COMMENT(BaseModel):
 
 class ATTACHMENT(BaseModel):
     Type = TextField()
+    # available types for now: image,text,file,video
     URLS = JSONField()  # mirrors for the same file
     material = ForeignKeyField(
         MATERIAL, backref='attachments')  # WITH_ATTACHMENT
