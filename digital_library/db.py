@@ -49,7 +49,7 @@ class COMMENT(BaseModel):
 
 class ATTACHMENT(BaseModel):
     Type = TextField()
-    # available types for now: image,text,file,video
+    # available types for now: image,text,file,video,code
     URLS = JSONField()  # mirrors for the same file
     material = ForeignKeyField(
         MATERIAL, backref='attachments')  # WITH_ATTACHMENT
@@ -110,5 +110,5 @@ def create_tables():
 
 
 if __name__ == "__main__":
-    # Running: python -m digital_library.db.db
+    # Running: python -m digital_library.db
     create_tables()
