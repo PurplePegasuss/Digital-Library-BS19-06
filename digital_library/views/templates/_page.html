@@ -28,7 +28,10 @@
 </head>
 <body>
     {% include '_navbar.html' %}
-    {% include '_content.html' %}
     {% include '_footer.html' %}
+
+    {% block content %}
+    <!-- Content Section -->
+    {% endblock %}
 </body>
 </html>
