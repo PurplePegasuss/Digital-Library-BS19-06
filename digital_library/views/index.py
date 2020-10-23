@@ -24,4 +24,4 @@ def index():
                  .paginate(page, current_app.config['MATERIALS_PER_PAGE'])
                  )
 
-    return render_template('index.html', materials=materials, hello='world', page=page)
+    return render_template('index.html', materials=materials, page=page)
