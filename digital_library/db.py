@@ -35,6 +35,7 @@ class USER(BaseModel):
 
 class MATERIAL(BaseModel):
     Type = TextField()
+    Title = TextField(default='')
     # available types for now: educational
     Description = TextField(default='')
     tags = ManyToManyField(TAG, backref='materials')  # TAGGED_WITH
