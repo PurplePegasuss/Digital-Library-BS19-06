@@ -1,16 +1,33 @@
 <!--Author: Andrey-->
 {% extends '_page.html' %}
 {% block content %}
-    <div class="card">
-        {% for item in data.items() %}
-            <h5 class="card-header">{{ item["title"] }}</h5>
-            <div class="card-body">
-                {% for tag in item['tags']%}
-                    <h5 class="card-title">{{tag}}</h5>
-                {% endfor %}
-                <h5 class="card-title">{{ item["type"] }}</h5>
-                <a class="btn btn-primary" href={{ url_for('index.material', material_id = id) }}>Go to the material</a>
+    {% for item in data%}
+        {% if loop.index0%2 ==0 %}
+            <div class = "row .row-cols-1">
+        {%  endif %}
+        <div class="col-sm-6">
+            <div class="card card-height: 100% m-4" >
+                <h5 class="card-header">{{ item["title"] }}</h5>
+                <div class="card-body">
+                    <h5 class="card-title">
+                        Tags:
+                        {% for tag in item['tags']%}
+                            {{tag}};
+                        {% endfor %}
+                    </h5>
+                    <h5 class="card-text">{{ item["type"] }}</h5>
+                    <h3 class="card-text">Description: {{ item["description"] }}</h3>
+                    <h3 class="card-text">Authors:
+                        {% for author in item['authors']%}
+                            {{author}};
+                        {% endfor %}
+                    </h3>
+                    <a class="button" href={{ url_for('index.material', material_id = item['id']) }}>Go to the material</a>
+                </div>
             </div>
-        {%  endfor %}
-    </div>
+        </div>
+        {% if loop.index0%2==1 or loop.last %}
+            </div>
+        {%  endif %}
+    {%  endfor %}
 {% endblock %}
