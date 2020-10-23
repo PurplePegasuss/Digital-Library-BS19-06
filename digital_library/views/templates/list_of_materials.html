@@ -1,7 +1,16 @@
+<!--Author: Andrey-->
 {% extends '_page.html' %}
 {% block content %}
-    {% for name, id in data %}
-        {{ id }}
-        <a href={{ url_for('index.material', materialId = id) }}>{{ name }}</a>
-    {%  endfor %}
+    <div class="card">
+        {% for item in data.items() %}
+            <h5 class="card-header">{{ item["title"] }}</h5>
+            <div class="card-body">
+                {% for tag in item['tags']%}
+                    <h5 class="card-title">{{tag}}</h5>
+                {% endfor %}
+                <h5 class="card-title">{{ item["type"] }}</h5>
+                <a class="btn btn-primary" href={{ url_for('index.material', material_id = id) }}>Go to the material</a>
+            </div>
+        {%  endfor %}
+    </div>
 {% endblock %}
