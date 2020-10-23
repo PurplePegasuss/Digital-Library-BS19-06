@@ -40,9 +40,10 @@ def material_overview(material_id = None):
     if material_id is None:
         abort(404, description = "No such material exists!")
 
-    # If no such material exists, raise 404
-    if not MATERIAL.select().where(id = material_id).exists():
-        abort(404, description = "No such material exists!")
+    #
+    # # If no such material exists, raise 404
+    # if not MATERIAL.select().where(id = material_id).exists():
+    #     abort(404, description = "No such material exists!")
 
     # This dictionary is to be sent to the template
     data = {}
