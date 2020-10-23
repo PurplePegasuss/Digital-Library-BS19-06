@@ -1,4 +1,4 @@
-from flask import Blueprint, jsonify, render_template, abort
+from flask import Blueprint, render_template, abort
 from digital_library.db import *
 
 index_router = Blueprint('index', __name__, template_folder = 'templates')
@@ -11,17 +11,16 @@ def index():
 
 @index_router.errorhandler(404)
 def page_not_found(message):
-    return jsonify(error = str(message)), 404
+    return render_template('handler404.html', data = message), 404
 
 
 @index_router.route('/list_of_materials')
 def list_of_materials():
-    # TODO: if database is empty, raise 404 (fix somehow)
+    # TODO: if database is empty, raise 404 ???
     if not MATERIAL.select().exists():
         abort(404, "There are no materials at all!")
 
     data = []
-
     for material in MATERIAL.select():
         data.append({
             'id': material.id,
@@ -38,12 +37,11 @@ def list_of_materials():
 @index_router.route('/list_of_materials/<material_id>')
 def material_overview(material_id = None):
     if material_id is None:
-        abort(404, description = "No such material exists!")
+        abort(404, "No such material exists!")
 
-    #
-    # # If no such material exists, raise 404
-    # if not MATERIAL.select().where(id = material_id).exists():
-    #     abort(404, description = "No such material exists!")
+    # If no such material exists, raise 404
+    if not MATERIAL.select().where(MATERIAL.id == material_id).exists():
+        abort(404, "No such material exists!")
 
     # This dictionary is to be sent to the template
     data = {}
@@ -65,9 +63,11 @@ def material_overview(material_id = None):
     data['comments'] = []
     for comment in COMMENT.select(COMMENT.commented_material == material_id):
         data['comments'].append({
-            'authors': comment.author,
+            'author': USER.get_by_id(comment.author).FullName,
             'text': comment.Text
         })
+
+        print(USER.get_by_id(comment.author).FullName)
 
     # Retrieve respective attachments
     data['attachments'] = []
