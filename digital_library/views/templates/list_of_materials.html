@@ -1,0 +1,7 @@
+{% extends '_page.html' %}
+{% block content %}
+    {% for name, id in data %}
+        {{ id }}
+        <a href={{ url_for('index.material', materialId = id) }}>{{ name }}</a>
+    {%  endfor %}
+{% endblock %}

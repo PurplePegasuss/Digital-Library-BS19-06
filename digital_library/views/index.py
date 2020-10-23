@@ -22,6 +22,4 @@ def material(materialId = None):
     if materialId is None:
         return render_template('404.html'), 404
 
-    comment_text = COMMENT.get(COMMENT.commented_material)
-
     return render_template('comment_section.html')
