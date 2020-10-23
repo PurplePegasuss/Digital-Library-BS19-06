@@ -1,13 +1,17 @@
-<nav class="navbar navbar-expand-lg bg-moodle">
-  <a class="navbar-brand" href="">Menu</a>
-  <button class="navbar-toggler" type="button" data-toggle="collapse" data-target="#navbarNavAltMarkup"
-          aria-controls="navbarNavAltMarkup" aria-expanded="false" aria-label="Toggle navigation">
-    <span class="navbar-toggler-icon"></span>
-  </button>
-  <div class="collapse navbar-collapse" id="navbarNavAltMarkup">
-    <div class="navbar-nav">
-      <a class="nav-link active" href="/">Main page<span class="sr-only">(current)</span></a>
-      <a class="nav-link" href="/admin">Admin</a>
+{% block navbar %}
+    <nav class="navbar navbar-expand-lg navbar-dark bg-moodle">
+        <a class="navbar-brand" href="">Menu</a>
+        <button class="navbar-toggler" type="button" data-toggle="collapse" data-target="#navbarNavAltMarkup"
+                aria-controls="navbarNavAltMarkup" aria-expanded="false" aria-label="Toggle navigation">
+        <span class="navbar-toggler-icon"></span>
+        </button>
+    <div class="collapse navbar-collapse" id="navbarNavAltMarkup">
+        <div class="navbar-nav">
+            {% block menu %}
+                <a class="nav-link active" href="/">Main page<span class="sr-only">(current)</span></a>
+                <a class="nav-link" href="/admin">Admin</a>
+            {% endblock %}
+        </div>
     </div>
-  </div>
-</nav>
+    </nav>
+{%  endblock %}
