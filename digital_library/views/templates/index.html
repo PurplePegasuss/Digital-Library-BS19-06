@@ -12,14 +12,14 @@
                     <h5 class="card-title">
                         Tags:
                         {% for tag in item.tags %}
-                            {{ tag }};
+                            {{ tag.Name }};
                         {% endfor %}
                     </h5>
                     <h5 class="card-text">{{ item.Type }}</h5>
                     <h3 class="card-text">Description: {{ item.Description }}</h3>
                     <h3 class="card-text">Authors:
                         {% for author in item.authors %}
-                            {{ author }};
+                            {{ author.FullName }};
                         {% endfor %}
                     </h3>
                     <a class="button" href={{ url_for('index.material_overview', material_id = item.id) }}>Go to the material</a>
