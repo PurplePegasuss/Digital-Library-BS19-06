@@ -25,11 +25,20 @@ def index():
 
 @index_router.errorhandler(404)
 def page_not_found(message):
-    return render_template('handler404.html', data = message), 404
+    return render_template('handler404.html', data=message), 404
 
 
-@index_router.route('/material/<material_id>')
-def material_overview(material_id = None):
+@index_router.route('/material/<int:material_id>')
+def material_overview(material_id=None):
+    try:
+        page = int(request.args.get('page', 0))
+        if page < 0:
+            abort(400, description="The page can't be less than 0")
+            return
+    except ValueError:
+        abort(404, description='Page is not found')
+        return
+
     if material_id is None:
         abort(404, "No such material exists!")
 
@@ -37,38 +46,9 @@ def material_overview(material_id = None):
     if not MATERIAL.select().where(MATERIAL.id == material_id).exists():
         abort(404, "No such material exists!")
 
-    # This dictionary is to be sent to the template
-    data = {}
-
     # Retrieve the material from DB
-    material = MATERIAL.get(id = material_id)
+    material = MATERIAL.get(id=material_id)
+    # This object can be used in templates as material.<attribute_name>
 
-    # Retrieve its attributes
-    data['material_attr'] = {
-            'id': material.id,
-            'type': material.Type,
-            'title': material.Title,
-            'description': material.Description,
-            'tags': [TAG.get_by_id(tag_id).Name for tag_id in material.tags],
-            'authors': [USER.get_by_id(user_id).FullName for user_id in material.authors]
-        }
-
-    # Retrieve respective comments
-    data['comments'] = []
-    for comment in COMMENT.select(COMMENT.commented_material == material_id):
-        data['comments'].append({
-            'author': USER.get_by_id(comment.author).FullName,
-            'text': comment.Text
-        })
-
-        print(USER.get_by_id(comment.author).FullName)
-
-    # Retrieve respective attachments
-    data['attachments'] = []
-    for attachment in ATTACHMENT.select(ATTACHMENT.material == material_id):
-        data['attachments'].append({
-            'type': attachment.Type,
-            'urls': [url for url in attachment.URLS]
-        })
-
-    return render_template('material.html', data = data)
+    return render_template('material.html', material=material, page=page,
+                           comments_per_page=current_app.config["COMMENTS_PER_PAGE"])
