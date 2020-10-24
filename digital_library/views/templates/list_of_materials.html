@@ -1,11 +1,10 @@
 {% extends '_page.html' %}
 {% block content %}
+    <div class = "container">
+    <div class = "row">
     {% for item in data%}
-        {% if loop.index0%2 ==0 %}
-            <div class = "row .row-cols-1">
-        {%  endif %}
-        <div class="col-sm-6">
-            <div class="card card-height: 100% m-4" >
+        <div class = "col-12 col-md-6">
+            <div class="card card-height: 100% m-4">
                 <h5 class="card-header">{{ item["title"] }}</h5>
                 <div class="card-body">
                     <h5 class="card-title">
@@ -25,8 +24,7 @@
                 </div>
             </div>
         </div>
-        {% if loop.index0 % 2 == 1 or loop.last %}
-            </div>
-        {%  endif %}
     {%  endfor %}
+    </div>
+    </div>
 {% endblock %}
