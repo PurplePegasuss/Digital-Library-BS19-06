@@ -53,15 +53,15 @@ def material_overview(material_id = None):
             'authors': [USER.get_by_id(user_id).FullName for user_id in material.authors]
         }
 
-    # Retrieve respective comments
-    data['comments'] = []
-    for comment in COMMENT.select(COMMENT.commented_material == material_id):
-        data['comments'].append({
-            'author': USER.get_by_id(comment.author).FullName,
-            'text': comment.Text
-        })
-
-        print(USER.get_by_id(comment.author).FullName)
+    # # Retrieve respective comments
+    # data['comments'] = []
+    # for comment in COMMENT.select(COMMENT.commented_material == material_id):
+    #     data['comments'].append({
+    #         'author': USER.get_by_id(comment.author).FullName,
+    #         'text': comment.Text
+    #     })
+    #
+    #     print(USER.get_by_id(comment.author).FullName)
 
     # Retrieve respective attachments
     data['attachments'] = []
