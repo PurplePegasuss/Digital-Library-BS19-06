@@ -17,9 +17,6 @@ def index():
 
     materials = (MATERIAL
                  .select()
-                 .join(MATERIAL.tags.get_through_model())
-                 .switch(MATERIAL)
-                 .join(MATERIAL.authors.get_through_model())
                  .paginate(page, current_app.config['MATERIALS_PER_PAGE'])
                  )
 
