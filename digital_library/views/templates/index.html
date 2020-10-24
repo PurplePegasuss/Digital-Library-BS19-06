@@ -7,21 +7,46 @@
     {% for item in materials %}
         <div class="col-12 col-md-6 mb-4">
             <div class="card h-100 m-4">
-                <h5 class="card-header">{{ item.Title }}</h5>
                 <div class="card-body">
-                    <h5 class="card-title">
-                        Tags:
-                        {% for tag in item.tags %}
-                            {{ tag.Name }};
-                        {% endfor %}
-                    </h5>
-                    <h5 class="card-text">{{ item.Type }}</h5>
-                    <h3 class="card-text">Description: {{ item.Description }}</h3>
-                    <h3 class="card-text">Authors:
-                        {% for author in item.authors %}
-                            {{ author.FullName }};
-                        {% endfor %}
-                    </h3>
+                    {% if item.authors|length > 0 %}
+                        <h6 class="card-text text-secondary">Authors:
+                            {% for author in item.authors %}
+                                {{ author.FullName }}
+                                {% if not loop.last %}
+                                    ;
+                                {% endif %}
+                            {% endfor %}
+                        </h6>
+                        <hr class="hr">
+                    {% endif %}
+                    {% if item.Title %}
+                        <strong>
+                            <h1 class="card-title">
+                                <a class="text-dark" href={{ url_for('index.material_overview', material_id = item.id) }}>{{ item.Title }}</a>
+                            </h1>
+                        </strong>
+                    {% endif %}
+                    {% if item.tags|length > 0 %}
+                        <h5 class="card-text text-secondary">
+                            Tags:
+                            {% for tag in item.tags %}
+                                <a href="" class="badge badge-pill bg-moodle">{{ tag.Name }}</a>
+                            {% endfor %}
+                        </h5>
+                    {% endif %}
+                    {% if  item.tags|length > 0 or item.Title%}
+                        <hr class="hr"/>
+                    {% endif %}
+                    {% if item.Type %}
+                        <small>
+                            <p class="h6">{{ item.Type }}</p>
+                        </small>
+                    {% endif %}
+                    {%  if item.Description %}
+                        <p class="h3">{{ item.Description }}</p>
+                    {% endif %}
+                </div>
+                <div class="card-footer">
                     <a class="button" href={{ url_for('index.material_overview', material_id = item.id) }}>Go to the material</a>
                 </div>
             </div>
