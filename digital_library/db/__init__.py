@@ -39,12 +39,14 @@ class MATERIAL(BaseModel):
     # available types for now: educational
     Description = TextField(default='')
     tags = ManyToManyField(TAG, backref='materials')  # TAGGED_WITH
-    authors = ManyToManyField(USER, backref='suggested_materials')  # SUGGESTED_BY
+    authors = ManyToManyField(
+        USER, backref='suggested_materials')  # SUGGESTED_BY
 
 
 class COMMENT(BaseModel):
     Text = TextField()
-    commented_material = ForeignKeyField(MATERIAL, backref='comments')  # COMMENTED_WITH
+    commented_material = ForeignKeyField(
+        MATERIAL, backref='comments')  # COMMENTED_WITH
     author = ForeignKeyField(USER, backref='comments')  # PROVIDED_BY__COMMENT
 
 
@@ -52,13 +54,15 @@ class ATTACHMENT(BaseModel):
     Type = TextField()
     # available types for now: image,text,file,video,code
     URLS = JSONField()  # mirrors for the same file
-    material = ForeignKeyField(MATERIAL, backref='attachments')  # WITH_ATTACHMENT
+    material = ForeignKeyField(
+        MATERIAL, backref='attachments')  # WITH_ATTACHMENT
 
 
 class REVIEW(BaseModel):
     Text = TextField()
     Rating = IntegerField()
-    reviewed_material = ForeignKeyField(MATERIAL, backref='reviews')  # REVIEWED_WITH
+    reviewed_material = ForeignKeyField(
+        MATERIAL, backref='reviews')  # REVIEWED_WITH
     author = ForeignKeyField(USER, backref='reviews')  # PROVIDED_BY__REVIEW
 
 
