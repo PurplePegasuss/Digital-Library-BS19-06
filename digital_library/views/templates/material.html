@@ -1,4 +1,31 @@
 {% extends '_page.html' %}
 {% block content %}
+<div class="block1">
+    <p></p>
+    <div class="col-md-12 col-md-6 mb-4">
+    <p>
+    {% for url in data['attachments']%}
+        <a href = url['url'] > Download {{ data['attachments']['type'] }} File</a>
+    {%  endfor %}
+    <a href = data['url'] > Download {{ data['material_attr']['type'] }} File</a>
+    </p>
 
+    <h5><font size="6">{{ data['material_attr']['title'] }}</font></h5>
+    <div>
+        <h5><font size="5">
+            <strong>Tags</strong>:
+            {% for tag in data['material_attr']['tags']%}
+                {{tag}};
+            {% endfor %}
+        </font></h5>
+        <h5><font size="5">{{ data['material_attr']['type'] }}</font></h5>
+        <h5><font size="5"><strong>Description:</strong> {{ data['material_attr']['description'] }}</font></h5>
+        <h5><font size="5"><strong>Authors</strong>:
+            {% for author in data['material_attr']['authors']%}
+                {{author}};
+            {% endfor %}
+        </font></h5>
+    </div>
+</div>
+</div>
 {% endblock %}
