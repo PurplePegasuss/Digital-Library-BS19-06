@@ -31,27 +31,7 @@ def page_not_found(message):
     return render_template('handler404.html', data = message), 404
 
 
-@index_router.route('/list_of_materials')
-def list_of_materials():
-    # TODO: if database is empty, raise 404 ???
-    if not MATERIAL.select().exists():
-        abort(404, "There are no materials at all!")
-
-    data = []
-    for material in MATERIAL.select():
-        data.append({
-            'id': material.id,
-            'type': material.Type,
-            'title': material.Title,
-            'description': material.Description,
-            'tags': [TAG.get_by_id(tag_id).Name for tag_id in material.tags],
-            'authors': [USER.get_by_id(user_id).FullName for user_id in material.authors]
-        })
-
-    return render_template('list_of_materials.html', data = data)
-
-
-@index_router.route('/list_of_materials/<material_id>')
+@index_router.route('/material/<material_id>')
 def material_overview(material_id = None):
     if material_id is None:
         abort(404, "No such material exists!")
