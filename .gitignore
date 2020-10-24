@@ -3,5 +3,7 @@ __pycache__
 *.pyc
 .idea
 
+/data/*
+!/data/.gitkeep
 
 /venv
