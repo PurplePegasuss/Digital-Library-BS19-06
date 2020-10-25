@@ -52,3 +52,8 @@ def material_overview(material_id=None):
 
     return render_template('material.html', material=material, page=page,
                            comments_per_page=current_app.config["COMMENTS_PER_PAGE"])
+
+
+@index_router.route('/material/<int:material_id>/comment_section')
+def material_comment_section(material_id=None):
+    pass
