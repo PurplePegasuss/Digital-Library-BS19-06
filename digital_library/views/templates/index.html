@@ -21,9 +21,9 @@
                     {% endif %}
                     {% if item.Title %}
                         <strong>
-                            <h1 class="card-title">
+                            <h2 class="card-title">
                                 <a class="text-dark" href={{ url_for('index.material_overview', material_id = item.id) }}>{{ item.Title }}</a>
-                            </h1>
+                            </h2>
                         </strong>
                     {% endif %}
                     {% if item.tags|length > 0 %}
@@ -43,7 +43,7 @@
                         </small>
                     {% endif %}
                     {%  if item.Description %}
-                        <p class="h3">{{ item.Description }}</p>
+                        <p class="h4">{{ item.Description }}</p>
                     {% endif %}
                 </div>
                 <div class="card-footer">

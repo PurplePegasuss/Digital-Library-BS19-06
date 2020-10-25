@@ -1,0 +1,27 @@
+{% extends '_page.html' %}
+{% block content %}
+    <div class="container">
+        <div class="row">
+            
+        </div>
+        <div class="row">
+            {% for comment in comments %}
+                <div class="col-12 mb-4">
+                    <div class="card h-75 m-4">
+                        <div class="card-body">
+                            {% if comment.author %}
+                                <p class = "h6 text-secondary">
+                                    <img src="#" alt="User"height="20" width="20" vspace="5" hspace="5"/>
+                                    {{ comment.author.FullName }}
+                                </p>
+                            {% endif %}
+                            {% if comment.Text %}
+                                <p class="h3">{{comment.Text}}</p>
+                            {% endif %}
+                        </div>
+                    </div>
+                </div>
+            {% endfor %}
+        </div>
+    </div>
+{% endblock %}

@@ -5,13 +5,17 @@
         {%  block style %}
             <style>
                 .bg-moodle {
-                     background-color: #d2691e;
-                     color: white;
-                }
-                .button {
                     background-color: #d2691e;
-                    border: none;
                     color: white;
+                    text-decoration: None;
+                }
+                .bg-moodle:hover{
+                    color:white;
+                    text-decoration: None;
+                }
+                .button{
+                    color:white;
+                    border: none;
                     display: inline-block;
                     padding: 6px 6px;
                     text-align: center;
@@ -21,8 +25,28 @@
                     border-radius: 8px;
                     margin: 5px 5px;
                 }
+                .button:link{
+                    background-color: #d2691e;
+                    color:white;
+                    text-decoration: none;
+                }
+                .button:hover{
+                    background-color: #e2691e;
+                    color:white;
+                    text-decoration: none;
+                }
+                .button:focus {
+                    background-color: #f2691e;
+                    color:white;
+                    box-shadow: 0 0 0 3px chocolate;
+                }
+                .button:active{
+                    background-color: #e2691e;
+                    color:white;
+                    text-decoration: none;
+                }
                 hr.hr {
-                    border-top: 2px solid #d2691e;
+                    border-top: 2px solid gray;
                 }
 
             </style>
