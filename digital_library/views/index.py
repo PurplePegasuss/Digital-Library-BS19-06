@@ -54,6 +54,33 @@ def material_overview(material_id=None):
                            comments_per_page=current_app.config["COMMENTS_PER_PAGE"])
 
 
+# TODO: We need to merge this function with material_overview() later
 @index_router.route('/material/<int:material_id>/comment_section')
 def material_comment_section(material_id=None):
-    pass
+    try:
+        page = int(request.args.get('page', 0))
+        if page < 0:
+            abort(400, description="The page can't be less than 0")
+            return
+    except ValueError:
+        abort(404, description='Page is not found')
+        return
+
+    if material_id is None:
+        abort(404, "No such material exists!")
+
+    # If no such material exists, raise 404
+    if not MATERIAL.select().where(MATERIAL.id == material_id).exists():
+        abort(404, "No such material exists!")
+
+    # Retrieve the material from DB
+    material = MATERIAL.get(id=material_id)
+
+    comments = (COMMENT
+                .select()
+                .where(COMMENT.commented_material == material_id)
+                .paginate(page, current_app.config['COMMENTS_PER_PAGE'])
+                )
+
+    return render_template('comment_section.html', comments=comments, page=page,
+                           comments_per_page=current_app.config["COMMENTS_PER_PAGE"])
