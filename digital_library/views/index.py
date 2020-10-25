@@ -1,4 +1,6 @@
 from flask import Blueprint, render_template, current_app, request, abort
+from flask_paginate import Pagination
+
 from digital_library.db import *
 
 index_router = Blueprint('index', __name__, template_folder='templates')
@@ -57,10 +59,11 @@ def material_overview(material_id=None):
 # TODO: We need to merge this function with material_overview() later
 @index_router.route('/material/<int:material_id>/comment_section')
 def material_comment_section(material_id=None):
+    # Initial page is 1 now !
     try:
-        page = int(request.args.get('page', 0))
-        if page < 0:
-            abort(400, description="The page can't be less than 0")
+        page = int(request.args.get('page', 1))
+        if page < 1:
+            abort(400, description="The page can't be less than 1")
             return
     except ValueError:
         abort(404, description='Page is not found')
@@ -73,14 +76,25 @@ def material_comment_section(material_id=None):
     if not MATERIAL.select().where(MATERIAL.id == material_id).exists():
         abort(404, "No such material exists!")
 
-    # Retrieve the material from DB
-    material = MATERIAL.get(id=material_id)
-
+    # Retrieve comments on this material
     comments = (COMMENT
                 .select()
                 .where(COMMENT.commented_material == material_id)
-                .paginate(page, current_app.config['COMMENTS_PER_PAGE'])
                 )
 
-    return render_template('comment_section.html', comments=comments, page=page,
+    # Get the necessary slice
+    comments_paginated = comments.paginate(page, current_app.config['COMMENTS_PER_PAGE'])
+
+    # Create paginator
+    pagination = Pagination(
+        per_page=current_app.config['COMMENTS_PER_PAGE'],
+        total=len(comments),
+        page=page,
+        record_name='Comments'
+    )
+
+    return render_template('comment_section.html',
+                           comments=comments_paginated,
+                           page=page,
+                           pagination=pagination,
                            comments_per_page=current_app.config["COMMENTS_PER_PAGE"])
