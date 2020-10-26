@@ -17,9 +17,8 @@ def index():
         MATERIAL
         .select()
         .paginate(page, current_app.config['MATERIALS_PER_PAGE'])
-        .prefetch(MATERIAL.tags.get_through_model())
-        .switch(MATERIAL)
-        .prefetch(MATERIAL.authors.get_through_model())
+        .prefetch(MATERIAL.tags.get_through_model(),
+                  MATERIAL.authors.get_through_model())
     )
 
     return render_template('index.html', materials=materials, page=page)
