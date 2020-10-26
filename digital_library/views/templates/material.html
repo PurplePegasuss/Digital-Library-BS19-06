@@ -1,0 +1,34 @@
+{% extends '_page.html' %}
+{% block content %}
+    <div class="container">
+        <p></p>
+        <div class="col-md-12 col-md-6 mb-4">
+            <div class="row">
+                <div class="col-sm-4" style="background-color:antiquewhite;">
+                    <p class="text-center">
+                        <a href = page.url > Download {{ material.Type }} File</a>
+                    </p>
+                </div>
+                <div class="col-sm-6" style="background-color:white;">
+                    <h5><font size="6">{{ material.Title }}</font></h5>
+                        <div>
+                            <h5 class="card-text text-secondary"><font size="4">
+                                <strong>Tags</strong>:
+                                {% for tag in material.tags %}
+                                    <a href="" class="badge badge-pill bg-moodle">{{ tag.Name }}</a>
+                                {% endfor %}
+                            </font></h5>
+                            <h6><font size="4">{{ material.Type }}</font></h6>
+                            <br />
+                            <h5><font size="5"><strong>Description:</strong> {{ material.Description }}</font></h5>
+                            <h5 class="card-text text-secondary"><font size="4"><strong>Authors</strong>:
+                                {% for author in material.authors%}
+                                    {{author.FullName}};
+                                {% endfor %}
+                            </font></h5>
+                        </div>
+                </div>
+            </div>
+        </div>
+    </div>
+{% endblock %}

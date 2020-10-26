@@ -2,6 +2,9 @@ __PYCACHE__
 __pycache__
 *.pyc
 .idea
+.vscode
 
 /data/*
 !/data/.gitkeep
+
+/venv
