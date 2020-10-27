@@ -27,6 +27,8 @@ class USER(BaseModel):
     Email = TextField(unique=True)
     FirstName = TextField()
     SecondName = TextField()
+    # an invalid hash by default; can't be compared to anything
+    PasswordHash = TextField(default='#')
 
     @property
     def FullName(self):
@@ -53,7 +55,7 @@ class COMMENT(BaseModel):
 class ATTACHMENT(BaseModel):
     Type = TextField()
     # available types for now: image,text,file,video,code
-    URLS = JSONField()  # mirrors for the same file
+    Url = TextField(unique=True)
     material = ForeignKeyField(
         MATERIAL, backref='attachments')  # WITH_ATTACHMENT
 

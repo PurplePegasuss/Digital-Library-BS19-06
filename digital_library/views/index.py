@@ -12,15 +12,16 @@ def index():
         page = int(request.args.get('page', 0))
         if page < 0:
             abort(400, description="The page can't be less than 0")
-            return
     except ValueError:
         abort(404, description='Page is not found')
-        return
 
-    materials = (MATERIAL
-                 .select()
-                 .paginate(page, current_app.config['MATERIALS_PER_PAGE'])
-                 )
+    materials = (
+        MATERIAL
+        .select()
+        .paginate(page, current_app.config['MATERIALS_PER_PAGE'])
+        .prefetch(MATERIAL.tags.get_through_model(),
+                  MATERIAL.authors.get_through_model())
+    )
 
     return render_template('index.html', materials=materials, page=page)
 
@@ -36,21 +37,27 @@ def material_overview(material_id=None):
         page = int(request.args.get('page', 0))
         if page < 0:
             abort(400, description="The page can't be less than 0")
-            return
     except ValueError:
         abort(404, description='Page is not found')
-        return
 
     if material_id is None:
         abort(404, "No such material exists!")
 
-    # If no such material exists, raise 404
-    if not MATERIAL.select().where(MATERIAL.id == material_id).exists():
+    try:
+        # Retrieve the material from DB
+        material = (MATERIAL
+                    .select()
+                    .where(MATERIAL.id == material_id)
+                    .prefetch(COMMENT,
+                              ATTACHMENT,
+                              MATERIAL.tags.get_through_model(),
+                              MATERIAL.authors.get_through_model(),
+                              REVIEW
+                              )
+                    )[0]
+        # This object can be used in templates as material.<attribute_name>
+    except (MATERIAL.DoesNotExist, IndexError):
         abort(404, "No such material exists!")
-
-    # Retrieve the material from DB
-    material = MATERIAL.get(id=material_id)
-    # This object can be used in templates as material.<attribute_name>
 
     return render_template('material.html', material=material, page=page,
                            comments_per_page=current_app.config["COMMENTS_PER_PAGE"])
