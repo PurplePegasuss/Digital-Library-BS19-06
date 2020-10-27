@@ -53,6 +53,56 @@
         </div>
     {%  endfor %}
     </div>
+
+    {# Switcher between pages. #}
+    {# Нада красиво его сделать или хотя бы в центр поставить #}
+    {# Если не получится, то придется ручками #}
+    <br>
+    <br>
+    {{ pagination.links }}
+
+    {# Case for a single page #}
+    {% if pagination.total_pages == 1 %}
+        {# Current page only #}
+        <a>1</a>
+    {% endif %}
+
+    {# Case for the number of pages #}
+    {% if pagination.total_pages > 1 %}
+        {# Previous page #}
+        {% if pagination.has_prev %}
+            <a href="?page={{ page - 1 }}"><<</a>
+        {% endif %}
+
+        {# First page #}
+        {% if pagination.has_prev and page != 1%}
+            <a href="?page={{ 1 }}">1</a>
+        {% endif %}
+
+        {# Dots left #}
+        {% if pagination.has_prev and page != 1%}
+            <a>...</a>
+        {% endif %}
+
+        {# Current page #}
+        <a>{{ page }}</a>
+
+        {# Dots right #}
+        {% if pagination.has_next %}
+            <a>...</a>
+        {% endif %}
+
+        {# Last page #}
+        {% if pagination.has_next %}
+            <a href="?page={{ pagination.total_pages }}">{{ pagination.total_pages }}</a>
+        {% endif %}
+
+        {# Next page #}
+        {% if pagination.has_next %}
+            <a href="?page={{ page + 1 }}">>></a>
+        {% endif %}
+    {% endif %}
+
     </div>
 {% endblock %}
 
