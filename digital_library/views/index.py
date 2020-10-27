@@ -8,22 +8,40 @@ index_router = Blueprint('index', __name__, template_folder='templates')
 
 @index_router.route('/')
 def index():
+    # Retrieving material page number. It is 1 by default.
     try:
-        page = int(request.args.get('page', 0))
-        if page < 0:
-            abort(400, description="The page can't be less than 0")
+        page = int(request.args.get('page', 1))
+        if page < 1:
+            abort(400, description="The page number can't be less than 1")
     except ValueError:
         abort(404, description='Page is not found')
 
-    materials = (
+    # Retrieve all the materials
+    material_all = (
         MATERIAL
         .select()
-        .paginate(page, current_app.config['MATERIALS_PER_PAGE'])
         .prefetch(MATERIAL.tags.get_through_model(),
                   MATERIAL.authors.get_through_model())
     )
 
-    return render_template('index.html', materials=materials, page=page)
+    # Extract the necessary slice
+    per_page = current_app.config['MATERIALS_PER_PAGE']
+    material_page = material_all[(page - 1)*per_page:page*per_page]
+
+    # Create pagination
+    pagination = Pagination(
+        per_page=per_page,
+        total=len(material_all),
+        page=page,
+        bs_version=4,
+        record_name='Materials',
+        alignment='center'
+    )
+
+    return render_template('index.html',
+                           materials=material_page,
+                           pagination=pagination,
+                           page=page)
 
 
 @index_router.errorhandler(404)
