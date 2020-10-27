@@ -61,9 +61,6 @@ def material_overview(material_id=None):
         abort(404, description='Page is not found')
         return
 
-    # Retrieve the material
-    material = MATERIAL.get_by_id(material_id)
-
     # Retrieve comments on this material
     comments_all = (COMMENT
                     .select()
@@ -76,7 +73,7 @@ def material_overview(material_id=None):
     # Create pagination
     pagination = Pagination(
         per_page=current_app.config['COMMENTS_PER_PAGE'],
-        total=len(comments_all),
+        total=comments_all.count(),
         page=page,
         bs_version=4,
         record_name='Comments'
