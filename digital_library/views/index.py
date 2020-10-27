@@ -78,6 +78,7 @@ def material_overview(material_id=None):
         per_page=current_app.config['COMMENTS_PER_PAGE'],
         total=len(comments_all),
         page=page,
+        bs_version=4,
         record_name='Comments'
     )
 
@@ -85,6 +86,5 @@ def material_overview(material_id=None):
                            material=material,
                            comments=comment_page,
                            pagination=pagination,
-                           bs_version=4,
                            page=page,
                            comments_per_page=current_app.config["COMMENTS_PER_PAGE"])
