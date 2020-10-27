@@ -94,7 +94,8 @@ def material_overview(material_id=None):
         total=comments_all.count(),
         page=page,
         bs_version=4,
-        record_name='Comments'
+        record_name='Comments',
+        alignment='center'
     )
 
     return render_template('material.html',
