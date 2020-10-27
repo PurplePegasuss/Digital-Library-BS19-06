@@ -33,75 +33,58 @@ def page_not_found(message):
 
 @index_router.route('/material/<int:material_id>')
 def material_overview(material_id=None):
-    try:
-        page = int(request.args.get('page', 0))
-        if page < 0:
-            abort(400, description="The page can't be less than 0")
-    except ValueError:
-        abort(404, description='Page is not found')
-
-    if material_id is None:
+    if (material_id is None) or (not MATERIAL.select().where(MATERIAL.id == material_id).exists()):
         abort(404, "No such material exists!")
 
     try:
         # Retrieve the material from DB
+        # This object can be used in templates as material.<attribute_name>
         material = (MATERIAL
                     .select()
                     .where(MATERIAL.id == material_id)
-                    .prefetch(COMMENT,
-                              ATTACHMENT,
+                    .prefetch(ATTACHMENT,
                               MATERIAL.tags.get_through_model(),
                               MATERIAL.authors.get_through_model(),
                               REVIEW
                               )
                     )[0]
-        # This object can be used in templates as material.<attribute_name>
     except (MATERIAL.DoesNotExist, IndexError):
         abort(404, "No such material exists!")
 
-    return render_template('material.html', material=material, page=page,
-                           comments_per_page=current_app.config["COMMENTS_PER_PAGE"])
-
-
-# TODO: We need to merge this function with material_overview() later
-@index_router.route('/material/<int:material_id>/comment_section')
-def material_comment_section(material_id=None):
-    # Initial page is 1 now !
+    # Retrieving comment page number. It is 1 by default.
     try:
         page = int(request.args.get('page', 1))
         if page < 1:
-            abort(400, description="The page can't be less than 1")
+            abort(400, description="The page number can't be less than 1")
             return
     except ValueError:
         abort(404, description='Page is not found')
         return
 
-    if material_id is None:
-        abort(404, "No such material exists!")
-
-    # If no such material exists, raise 404
-    if not MATERIAL.select().where(MATERIAL.id == material_id).exists():
-        abort(404, "No such material exists!")
+    # Retrieve the material
+    material = MATERIAL.get_by_id(material_id)
 
     # Retrieve comments on this material
-    comments = (COMMENT
-                .select()
-                .where(COMMENT.commented_material == material_id)
-                )
+    comments_all = (COMMENT
+                    .select()
+                    .where(COMMENT.commented_material == material_id)
+                    )
 
     # Get the necessary slice
-    comments_paginated = comments.paginate(page, current_app.config['COMMENTS_PER_PAGE'])
+    comment_page = comments_all.paginate(page, current_app.config['COMMENTS_PER_PAGE'])
 
-    # Create paginator
+    # Create pagination
     pagination = Pagination(
         per_page=current_app.config['COMMENTS_PER_PAGE'],
-        total=len(comments),
+        total=len(comments_all),
         page=page,
         record_name='Comments'
     )
 
-    return render_template('comment_section.html',
-                           comments=comments_paginated,
-                           page=page,
+    return render_template('material.html',
+                           material=material,
+                           comments=comment_page,
                            pagination=pagination,
+                           bs_version=4,
+                           page=page,
                            comments_per_page=current_app.config["COMMENTS_PER_PAGE"])
