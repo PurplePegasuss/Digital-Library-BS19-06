@@ -40,14 +40,24 @@
     </div>
 
     {# Comment section part#}
+    <div class = "container">
+        <div class="row mb-4">
+        </div>
+        <form>
+            <div class="form-group">
+                <textarea class="form-control" name="comment" rows="3"></textarea>
+            </div>
+            <button type="submit" class="button"><p class="h5">Post it</p></button>
+        </form>
+    </div>
     <div class="container">
-        <div class="row">
+        <div class="row mt-4 mb-4">
         </div>
 
         <div class="row">
             {% for comment in comments %}
-                <div class="col-12 mb-4">
-                    <div class="card h-75 m-4">
+                <div class="col-12">
+                    <div class="card d-flex mb-4 mt-4">
                         <div class="card-body">
                             {% if comment.author %}
                                 <p class="h6 text-secondary">
