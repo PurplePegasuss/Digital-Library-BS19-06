@@ -1,6 +1,5 @@
 {% extends '_page.html' %}
 {% block content %}
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/jquery/3.3.1/jquery.min.js"></script>
     <script>
         // Adjust the indices of form fields when removing subforms
         function adjustIndices(removedIndex) {
@@ -87,54 +86,24 @@
             $('#add').click(addForm);
             $('.remove').click(removeForm);
         });
-    </script>
 
-
-    <script>
-        // In your Javascript (external .js resource or <script> tag)
-        $(document).ready(function () {
-            $('.js-example-basic-single').select2();
+        $(document).ready(function() {
+            $('.js-example-basic-multiple').select2();
         });
     </script>
 
-    <select class="js-example-basic-single" name="state">
-        <option value="AL">Alabama</option>
-        <option value="WY">Wyoming</option>
-    </select>
 
     <br>
     <br>
-
-    {# Searching form #}
     <form id="search-by-tags-form" action="" method="post" role="form">
-        {{ form.csrf_token }}
-        {{ form.material_name }}
-        <a id="add" href="#">Add tag</a>
-
-        {# Tag subforms #}
-        <form id="tags-form" action="" method="post" role="form">
-            <div id="subforms-container">
-                {% for subform in form.tags %}
-                    <div id="tag-{{ loop.index0 }}-form" class="subform" data-index="{{ loop.index0 }}">
-                        {{ subform.tag }}
-                        <a class="remove" href="#">Remove this tag</a>
-                    </div>
-                {% endfor %}
-            </div>
-            {{ form.submit }}
-        </form>
-
-        {# Form template comes from FieldList + SelectForm #}
-        {# Will be used when add and remove FieldList entries in JS#}
-        <div id="tag-_-form" class="hidden" data-index="_" hidden="true">
-            <select id="tags-_-tag" name="tags-_-tag">
-                {% for tag in form.tag_choices %}
-                    <option value={{ tag }}>{{ tag }}</option>
-                {% endfor %}
-            </select>
-            <a class="remove" href="#">Remove this tag</a>
-        </div>
+        <select class="js-example-basic-multiple" name="tags[]" multiple="multiple">
+        {% for tag in form.tag_choices %}
+            <option value={{tag}}>{{ tag }}</option>
+        {% endfor %}
+        </select>
+        <button class="button" type="submit">Find</button>
     </form>
+
 
     {# Display found materials #}
     <div class="container">
