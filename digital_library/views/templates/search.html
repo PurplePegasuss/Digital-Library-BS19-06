@@ -1,0 +1,194 @@
+{% extends '_page.html' %}
+{% block content %}
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/jquery/3.3.1/jquery.min.js"></script>
+    <script>
+        // Adjust the indices of form fields when removing subforms
+        function adjustIndices(removedIndex) {
+            const $forms = $('.subform');
+
+            $forms.each(function (i) {
+                const $form = $(this);
+                const index = parseInt($form.data('index'));
+                const newIndex = index - 1;
+
+                if (index < removedIndex) {
+                    // Skip
+                    return true;
+                }
+
+                // Change ID in form itself
+                $form.attr('id', $form.attr('id').replace(index, newIndex));
+                $form.data('index', newIndex);
+
+                // Change IDs in form inputs
+                $form.find('select').each(function (j) {
+                    const $item = $(this);
+                    $item.attr('id', $item.attr('id').replace(index, newIndex));
+                    $item.attr('name', $item.attr('name').replace(index, newIndex));
+                });
+            });
+        }
+
+        function removeForm() {
+            const $removedForm = $(this).closest('.subform');
+            const removedIndex = parseInt($removedForm.data('index'));
+
+            $removedForm.remove();
+
+            // Update indices
+            adjustIndices(removedIndex);
+        }
+
+        function addForm() {
+            const $templateForm = $('#tag-_-form');
+
+            if (!$templateForm) {
+                console.log('[ERROR] Cannot find template for subform!');
+                return;
+            }
+
+            // Get Last index
+            const $lastForm = $('.subform').last();
+
+            let newIndex = 0;
+            if ($lastForm.length > 0) {
+                newIndex = parseInt($lastForm.data('index')) + 1;
+            }
+
+            if (newIndex > {{ form.MAX_TAGS }}) {
+                alert('Reached maximum number of tags!');
+                return;
+            }
+
+            // Add elements
+            const $newForm = $templateForm.clone();
+
+            $newForm.attr('id', $newForm.attr('id').replace('_', newIndex));
+            $newForm.data('index', newIndex);
+
+            $newForm.find('select').each(function (idx) {
+                const $item = $(this);
+
+                $item.attr('id', $item.attr('id').replace('_', newIndex));
+                $item.attr('name', $item.attr('name').replace('_', newIndex));
+            });
+
+            // Append
+            $('#subforms-container').append($newForm);
+
+            $newForm.removeAttr('hidden');
+            $newForm.addClass('subform');
+            $newForm.removeClass('hidden');
+            $newForm.find('.remove').click(removeForm);
+        }
+
+
+        $(document).ready(function () {
+            $('#add').click(addForm);
+            $('.remove').click(removeForm);
+        });
+    </script>
+
+
+    <script>
+        // In your Javascript (external .js resource or <script> tag)
+        $(document).ready(function () {
+            $('.js-example-basic-single').select2();
+        });
+    </script>
+
+    <select class="js-example-basic-single" name="state">
+        <option value="AL">Alabama</option>
+        <option value="WY">Wyoming</option>
+    </select>
+
+    <br>
+    <br>
+
+    {# Searching form #}
+    <form id="search-by-tags-form" action="" method="post" role="form">
+        {{ form.csrf_token }}
+        {{ form.material_name }}
+        <a id="add" href="#">Add tag</a>
+
+        {# Tag subforms #}
+        <form id="tags-form" action="" method="post" role="form">
+            <div id="subforms-container">
+                {% for subform in form.tags %}
+                    <div id="tag-{{ loop.index0 }}-form" class="subform" data-index="{{ loop.index0 }}">
+                        {{ subform.tag }}
+                        <a class="remove" href="#">Remove this tag</a>
+                    </div>
+                {% endfor %}
+            </div>
+            {{ form.submit }}
+        </form>
+
+        {# Form template comes from FieldList + SelectForm #}
+        {# Will be used when add and remove FieldList entries in JS#}
+        <div id="tag-_-form" class="hidden" data-index="_" hidden="true">
+            <select id="tags-_-tag" name="tags-_-tag">
+                {% for tag in form.tag_choices %}
+                    <option value={{ tag }}>{{ tag }}</option>
+                {% endfor %}
+            </select>
+            <a class="remove" href="#">Remove this tag</a>
+        </div>
+    </form>
+
+    {# Display found materials #}
+    <div class="container">
+        <div class="row">
+            {% for item in materials %}
+                <div class="col-12 col-md-6 mb-4">
+                    <div class="card h-100 m-4">
+                        <div class="card-body">
+                            {% if item.authors|length > 0 %}
+                                <h6 class="card-text text-secondary">Authors:
+                                    {% for author in item.authors %}
+                                        {{ author.FullName }}
+                                        {% if not loop.last %}
+                                            ;
+                                        {% endif %}
+                                    {% endfor %}
+                                </h6>
+                                <hr class="hr">
+                            {% endif %}
+                            {% if item.Title %}
+                                <strong>
+                                    <h2 class="card-title">
+                                        <a class="text-dark"
+                                           href={{ url_for('index.material_overview', material_id = item.id) }}>{{ item.Title }}</a>
+                                    </h2>
+                                </strong>
+                            {% endif %}
+                            {% if item.tags|length > 0 %}
+                                <h5 class="card-text text-secondary">
+                                    Tags:
+                                    {% for tag in item.tags %}
+                                        <a href="" class="badge badge-pill bg-moodle">{{ tag.Name }}</a>
+                                    {% endfor %}
+                                </h5>
+                            {% endif %}
+                            {% if  item.tags|length > 0 or item.Title %}
+                                <hr class="hr"/>
+                            {% endif %}
+                            {% if item.Type %}
+                                <small>
+                                    <p class="h6">{{ item.Type }}</p>
+                                </small>
+                            {% endif %}
+                            {% if item.Description %}
+                                <p class="h4">{{ item.Description }}</p>
+                            {% endif %}
+                        </div>
+                        <div class="card-footer">
+                            <a class="button" href={{ url_for('index.material_overview', material_id = item.id) }}>Go to
+                                the material</a>
+                        </div>
+                    </div>
+                </div>
+            {% endfor %}
+        </div>
+    </div>
+{% endblock %}

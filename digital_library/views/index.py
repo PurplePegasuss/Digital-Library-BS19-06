@@ -1,6 +1,6 @@
 from flask import Blueprint, render_template, current_app, request, abort
 from flask_paginate import Pagination
-
+from digital_library.views.forms import *
 from digital_library.db import *
 
 index_router = Blueprint('index', __name__, template_folder='templates')
@@ -42,6 +42,54 @@ def index():
                            materials=material_page,
                            pagination=pagination,
                            page=page)
+
+
+@index_router.route('/search', methods=['GET', 'POST'])
+def search(add_tag=False, remove_tag=False):
+    form = MaterialSearchForm(request.form)
+
+    if request.method == 'POST' and form.validate_on_submit():
+        tags = list(set([t['tag'] for t in form.tags.data]))
+        text = form.material_name.data.strip()
+
+        tag_IDs = (
+                TAG
+                .select(TAG.id)
+                .where(TAG.Name.in_(tags))
+        )
+
+        print(tags)
+        print(tag_IDs)
+
+        materials = (
+            MATERIAL
+            .select()
+            .prefetch(MATERIAL.tags.get_through_model(),
+                      MATERIAL.authors.get_through_model())
+        )
+
+        results = []
+        for material in materials:
+            if set([tag.Name for tag in material.tags]) & set(tags) == set(tags):
+                if (text.lower() in material.Title.lower()) or (text in material.Description.lower()):
+                    results.append(material)
+
+        # tag_IDs = TAG.select(TAG.get_id).where()
+        #
+        # materials = (
+        #     MATERIAL
+        #     .select()
+        #     .where(MATERIAL.tags.in_())
+        # )
+
+        print(tags)
+
+        return render_template("search.html", materials=results, form=form)
+
+    else:
+        print('NOOO')
+
+    return render_template('search.html', form=form)
 
 
 @index_router.errorhandler(404)
