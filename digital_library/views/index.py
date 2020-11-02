@@ -1,4 +1,4 @@
-from flask import Blueprint, render_template, current_app, request, abort
+from flask import Blueprint, render_template, current_app, request, abort, redirect, url_for
 from flask_paginate import Pagination
 from digital_library.views.forms import *
 from digital_library.db import *
@@ -45,51 +45,145 @@ def index():
 
 
 @index_router.route('/search', methods=['GET', 'POST'])
-def search(add_tag=False, remove_tag=False):
-    form = MaterialSearchForm(request.form)
+def search():
+    # If a user presses the search button
+    if request.method == 'POST':
+        text = request.form.get('text')
 
-    if request.method == 'POST' and form.validate_on_submit():
-        tags = list(set([t['tag'] for t in form.tags.data]))
-        text = form.material_name.data.strip()
+        tag_ids = request.form.getlist('tag')
+        tag_names = [TAG[i].Name for i in tag_ids]
 
-        tag_IDs = (
-                TAG
-                .select(TAG.id)
-                .where(TAG.Name.in_(tags))
+        return redirect(url_for(
+            "index.search",
+            text=text,
+            tag=tag_names
+        ))
+
+    tags_all = [t for t in TAG.select().order_by(TAG.Name)]
+
+    text = request.args.get('text', '').lower().strip()
+    tags_names = request.args.getlist('tag')
+
+    # TODO: design the message for user
+    message = f'Results for "{text}" and {str(tags_names)} are:'
+
+    # If no tags are chosen, searching is done by any tag
+    if not tags_names:
+        tags_names = [t.Name for t in tags_all]
+
+    # These tags are selected by user
+    candidate_tags = (
+        TAG
+        .select()
+        .where(TAG.Name.in_(tags_names))
+    )
+
+    # These materials contain "Text"
+    candidate_by_desc_materials = (
+        MATERIAL
+        .select()
+        .where(
+            MATERIAL.Title.contains(text) |
+            MATERIAL.Description.contains(text)
         )
+    )
 
-        print(tags)
-        print(tag_IDs)
-
-        materials = (
-            MATERIAL
-            .select()
-            .prefetch(MATERIAL.tags.get_through_model(),
-                      MATERIAL.authors.get_through_model())
+    # TODO: do search in user FullNames instead of FirstNames
+    # These users' contain "Text"
+    candidate_users = (
+        USER
+        .select()
+        .where(
+            USER.FirstName.contains(text)
         )
+    )
 
-        results = []
-        for material in materials:
-            if set([tag.Name for tag in material.tags]) & set(tags) == set(tags):
-                if (text.lower() in material.Title.lower()) or (text in material.Description.lower()):
-                    results.append(material)
+    candidate_tags_id = [t.id for t in candidate_tags]
+    candidate_users_id = [u.id for u in candidate_users]
 
-        # tag_IDs = TAG.select(TAG.get_id).where()
-        #
-        # materials = (
-        #     MATERIAL
-        #     .select()
-        #     .where(MATERIAL.tags.in_())
-        # )
+    # These materials have candidate authors
+    candidates_by_author = (
+        MATERIAL.authors
+        .get_through_model()
+        .select()
+        .where(
+            MATERIAL.authors
+            .get_through_model()
+            .user_id
+            .in_(candidate_users_id)
+        )
+    )
 
-        print(tags)
+    # TODO: 'MATERIAL.tags' should be a subset of 'candidate_tags_id', not just in_
+    # These materials have selected tags
+    candidates_by_tag = (
+        MATERIAL.tags
+        .get_through_model()
+        .select()
+        .where(
+            MATERIAL.tags
+            .get_through_model()
+            .tag_id
+            .in_(candidate_tags_id)
+        )
+    )
 
-        return render_template("search.html", materials=results, form=form)
+    # "Text" is found in the title/description of a material
+    candidate_materials_1_id = set(m.id for m in candidate_by_desc_materials)
 
-    else:
-        print('NOOO')
+    # "Text" is found in authors' FullName
+    candidate_materials_2_id = set(m.material_id for m in candidates_by_author)
 
-    return render_template('search.html', form=form)
+    # Those tags are selected
+    candidate_materials_3_id = set(m.material_id for m in candidates_by_tag)
+
+    # These materials are found
+    materials_requested_id = (
+        candidate_materials_3_id &
+        (candidate_materials_1_id | candidate_materials_2_id)
+    )
+    material_requested = (
+        MATERIAL
+        .select()
+        .where(
+            MATERIAL.id.in_(materials_requested_id)
+        )
+        .prefetch(
+            MATERIAL.tags.get_through_model(),
+            MATERIAL.authors.get_through_model()
+        )
+    )
+
+    # Retrieving material page number. It is 1 by default.
+    try:
+        page = int(request.args.get('page', 1))
+        if page < 1:
+            abort(400, description="The page number can't be less than 1")
+    except ValueError:
+        abort(404, description='Page is not found')
+
+    # Extract the necessary slice
+    per_page = current_app.config['MATERIALS_PER_PAGE']
+    material_page = material_requested[(page - 1) * per_page:page * per_page]
+
+    # Create pagination
+    pagination = Pagination(
+        per_page=per_page,
+        total=len(material_requested),
+        page=page,
+        bs_version=4,
+        record_name='Materials',
+        alignment='center'
+    )
+
+    return render_template(
+        'search.html',
+        tags_all=tags_all,
+        materials=material_page,
+        pagination=pagination,
+        page=page,
+        message=message
+    )
 
 
 @index_router.errorhandler(404)
