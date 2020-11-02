@@ -2,7 +2,7 @@ from hashlib import sha512
 from peewee import prefetch
 
 from .app import app
-from .db import USER
+from .db import USER, database
 from flask_login import LoginManager, login_user, logout_user
 
 login_manager = LoginManager()
@@ -44,7 +44,7 @@ def login(email: str, password: str) -> USER:
     user = USER.get_or_none((USER.Email == email) & (USER.PasswordHash == password_hash))
 
     if user is None:
-        raise AuthException()
+        raise InvalidCredentialsException()
 
     login_user(user)
 
@@ -60,7 +60,7 @@ def register(email: str, password: str, first_name: str = "anon", second_name: s
     if if_exists:
         raise AlreadyExistException()
 
-    with USER.Meta.database.atomic() as transaction:
+    with database.atomic() as transaction:
         user = USER.create(Email=email, FirstName=first_name, SecondName=second_name,
                            PasswordHash=_hash_password(password))
 
