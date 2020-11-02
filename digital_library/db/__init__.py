@@ -1,7 +1,7 @@
-from peewee import *
-from playhouse.sqlite_ext import *
-from playhouse.flask_utils import FlaskDB
 from flask_admin.contrib.peewee import ModelView
+from playhouse.flask_utils import FlaskDB
+from playhouse.hybrid import hybrid_property
+from playhouse.sqlite_ext import *
 
 from digital_library.app import app, admin
 
@@ -30,7 +30,7 @@ class USER(BaseModel):
     # an invalid hash by default; can't be compared to anything
     PasswordHash = TextField(default='#')
 
-    @property
+    @hybrid_property
     def FullName(self):
         return self.FirstName + ' ' + self.SecondName
 
