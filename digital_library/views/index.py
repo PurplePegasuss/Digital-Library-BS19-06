@@ -1,6 +1,5 @@
 from flask import Blueprint, render_template, current_app, request, abort, redirect, url_for
 from flask_paginate import Pagination
-from digital_library.views.forms import *
 from digital_library.db import *
 
 index_router = Blueprint('index', __name__, template_folder='templates')
@@ -64,9 +63,6 @@ def search():
     text = request.args.get('text', '').lower().strip()
     tags_names = request.args.getlist('tag')
 
-    # TODO: design the message for user
-    message = f'Results for "{text}" and {str(tags_names)} are:'
-
     # If no tags are chosen, searching is done by any tag
     if not tags_names:
         tags_names = [t.Name for t in tags_all]
@@ -88,13 +84,11 @@ def search():
         )
     )
 
-    # TODO: do search in user FullNames instead of FirstNames
-    # These users' contain "Text"
     candidate_users = (
         USER
         .select()
         .where(
-            USER.FirstName.contains(text)
+            USER.FullName.contains(text)
         )
     )
 
@@ -182,7 +176,8 @@ def search():
         materials=material_page,
         pagination=pagination,
         page=page,
-        message=message
+        request_text=text,
+        request_tags=tags_names
     )
 
 
