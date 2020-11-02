@@ -26,16 +26,16 @@ category = "main"
 optional = false
 python-versions = ">=2.7, !=3.0.*, !=3.1.*, !=3.2.*, !=3.3.*, !=3.4.*"
 
+[package.extras]
+dev = ["pytest", "coverage", "tox", "sphinx", "pallets-sphinx-themes", "sphinxcontrib-log-cabinet", "sphinx-issues"]
+docs = ["sphinx", "pallets-sphinx-themes", "sphinxcontrib-log-cabinet", "sphinx-issues"]
+dotenv = ["python-dotenv"]
+
 [package.dependencies]
 click = ">=5.1"
 itsdangerous = ">=0.24"
 Jinja2 = ">=2.10.1"
 Werkzeug = ">=0.15"
-
-[package.extras]
-dev = ["pytest", "coverage", "tox", "sphinx", "pallets-sphinx-themes", "sphinxcontrib-log-cabinet", "sphinx-issues"]
-docs = ["sphinx", "pallets-sphinx-themes", "sphinxcontrib-log-cabinet", "sphinx-issues"]
-dotenv = ["python-dotenv"]
 
 [[package]]
 name = "flask-admin"
@@ -45,13 +45,24 @@ category = "main"
 optional = false
 python-versions = "*"
 
+[package.extras]
+aws = ["boto"]
+azure = ["azure-storage-blob"]
+
 [package.dependencies]
 Flask = ">=0.7"
 wtforms = "*"
 
-[package.extras]
-aws = ["boto"]
-azure = ["azure-storage-blob"]
+[[package]]
+name = "flask-login"
+version = "0.5.0"
+description = "User session management for Flask"
+category = "main"
+optional = false
+python-versions = "*"
+
+[package.dependencies]
+Flask = "*"
 
 [[package]]
 name = "flask-paginate"
@@ -80,11 +91,11 @@ category = "main"
 optional = false
 python-versions = ">=2.7, !=3.0.*, !=3.1.*, !=3.2.*, !=3.3.*, !=3.4.*"
 
-[package.dependencies]
-MarkupSafe = ">=0.23"
-
 [package.extras]
 i18n = ["Babel (>=0.8)"]
+
+[package.dependencies]
+MarkupSafe = ">=0.23"
 
 [[package]]
 name = "markupsafe"
@@ -150,18 +161,18 @@ category = "main"
 optional = false
 python-versions = "*"
 
-[package.dependencies]
-MarkupSafe = "*"
-
 [package.extras]
 email = ["email-validator"]
 ipaddress = ["ipaddress"]
 locale = ["Babel (>=1.3)"]
 
+[package.dependencies]
+MarkupSafe = "*"
+
 [metadata]
-lock-version = "1.1"
+lock-version = "1.0"
 python-versions = "^3.8"
-content-hash = "f637e9e001b6b029c6b20e8a4419c8e9793cb3cfa7614820b38c6736288acabc"
+content-hash = "18a60b17ea9bf0d77650ca2ba9c28596f643036a61e8a4a73396e16e579c73aa"
 
 [metadata.files]
 autopep8 = [
@@ -177,6 +188,10 @@ flask = [
 ]
 flask-admin = [
     {file = "Flask-Admin-1.5.6.tar.gz", hash = "sha256:68c761d8582d59b1f7702013e944a7ad11d7659a72f3006b89b68b0bd8df61b8"},
+]
+flask-login = [
+    {file = "Flask-Login-0.5.0.tar.gz", hash = "sha256:6d33aef15b5bcead780acc339464aae8a6e28f13c90d8b1cf9de8b549d1c0b4b"},
+    {file = "Flask_Login-0.5.0-py2.py3-none-any.whl", hash = "sha256:7451b5001e17837ba58945aead261ba425fdf7b4f0448777e597ddab39f4fba0"},
 ]
 flask-paginate = [
     {file = "flask-paginate-0.7.1.tar.gz", hash = "sha256:949b93d0535d1223b91ac0048586bd878aaebf4044c54c1dc3068acc9bdf441f"},
