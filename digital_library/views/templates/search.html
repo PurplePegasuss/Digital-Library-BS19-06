@@ -9,30 +9,51 @@
     </script>
 
     {# Search form #}
-    <form id="search-by-tags-form" method="post" role="form">
-        <label>
-            <input name="text" type="text">
-        </label>
-        <br>
-        <label>
-            <select class="js-example-basic-multiple" name="tag" multiple="multiple">
-                {% for tag in tags_all %}
-                    <option value={{tag.id}}>{{ tag.Name }}</option>
-                {% endfor %}
-            </select>
-        </label>
-        <button class="button" type="submit">Find</button>
-    </form>
-
-    {# Message for the user #}
-    <b>Results for {{ request_text }} and {{ request_tags }} are:</b>
+    <div class = "container mt-4 mb-4">
+        <form id="search-by-tags-form" method="post" role="form">
+            <div class="form-group">
+                <label>Search by content: </label>
+                <input class="form-control" name="text" type="text">
+            </div>
+            <br>
+            <div class="form-group">
+                <label>Search by tags:</label>
+                <select class="js-example-basic-multiple form-control" name="tag" multiple="multiple">
+                    {% for tag in tags_all %}
+                        <option value={{tag.id}}>{{ tag.Name }}</option>
+                    {% endfor %}
+                </select>
+            </div>
+            <button class="button" type="submit">Find</button>
+        </form>
+        {# Message for the user #}
+        {% if request_text or (request_tags|length < tags_all|length and request_tags|length > 0)%}
+            <p class="h5 mt-4">Results
+                {% if request_text %}
+                     for "{{ request_text }}"
+                {% endif %}
+                {% if request_text and (request_tags|length < tags_all|length and request_tags|length > 0)%}
+                     and
+                {% endif %}
+                {% if request_tags|length < tags_all|length and request_tags|length > 0%}
+                    for tags
+                    {% for request_tag in request_tags %}
+                        "{{ request_tag }}"
+                        {% if not loop.last %}
+                            ,
+                        {% endif %}
+                    {% endfor %}
+                {% endif %}
+            are:</p>
+        {% endif %}
+    </div>
 
     {# Display results. Same as index.html#}
     <div class="container">
     <div class = "row">
     {% for item in materials %}
         <div class="col-12 col-md-6 mb-4">
-            <div class="card h-100 m-4">
+            <div class="card h-100 mt-4 mb-4">
                 <div class="card-body">
                     {% if item.authors|length > 0 %}
                         <h6 class="card-text text-secondary">Authors:
