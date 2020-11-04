@@ -5,8 +5,28 @@ from .app import app
 from .db import USER, database
 from flask_login import LoginManager, login_user, logout_user
 
+from flask_wtf import FlaskForm
+from wtforms import StringField, PasswordField
+from wtforms.validators import InputRequired, Email, Length
+
+from flask import request, render_template, redirect, url_for, Blueprint
+
 login_manager = LoginManager()
 login_manager.init_app(app=app)
+
+auth_router = Blueprint('auth', __name__, template_folder='templates')
+
+
+class LoginForm(FlaskForm):
+    email = StringField('email', validators=[InputRequired(), Email(message='Invalid email'), Length(max=50)])
+    password = PasswordField('password', validators=[InputRequired(), Length(min=8, max=80)])
+
+
+class RegisterForm(FlaskForm):
+    firstname = StringField('firstname', validators=[InputRequired(), Length(min=2, max=50)])
+    secondname = StringField('firstname', validators=[InputRequired(), Length(min=2, max=50)])
+    email = StringField('email', validators=[InputRequired(), Email(message='Invalid email'), Length(max=50)])
+    password = PasswordField('password', validators=[InputRequired(), Length(min=8, max=80)])
 
 
 @login_manager.user_loader
