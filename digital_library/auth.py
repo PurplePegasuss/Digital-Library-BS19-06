@@ -74,6 +74,22 @@ def validate_login():
     return render_template('login.html', form=form)
 
 
+@auth_router.route('/register', methods=['GET', 'POST'])
+def validate_register():
+    form = RegisterForm()
+    if form.validate_on_submit():
+        first_name = form.first_name.data
+        second_name = form.second_name.data
+        email = form.email.data
+        password = form.password.data
+        try:
+            register(email, password, first_name, second_name)
+        except AuthException as e:
+            abort(400, description=str(e))
+
+    return render_template('register.html', form=form)
+
+
 def login(email: str, password: str) -> USER:
     password_hash = _hash_password(password)
     user = USER.get_or_none((USER.Email == email) & (USER.PasswordHash == password_hash))
