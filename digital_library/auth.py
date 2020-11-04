@@ -9,7 +9,7 @@ from flask_wtf import FlaskForm
 from wtforms import StringField, PasswordField
 from wtforms.validators import InputRequired, Email, Length
 
-from flask import request, render_template, redirect, url_for, Blueprint
+from flask import request, render_template, redirect, url_for, Blueprint, abort
 
 login_manager = LoginManager()
 login_manager.init_app(app=app)
@@ -57,6 +57,21 @@ class AlreadyExistException(AuthException):
 
 def _hash_password(password: str) -> str:
     return str(sha512(password.encode("utf-8")).hexdigest())
+
+
+@auth_router.route('/login', methods=['GET', 'POST'])
+def validate_login():
+    form = LoginForm()
+    if form.validate_on_submit():
+        email = form.email.data
+        password = form.password.data
+        try:
+            login(email, password)
+            return redirect(url_for('index.index'))
+        except AuthException as e:
+            abort(400, description=str(e))
+
+    return render_template('login.html', form=form)
 
 
 def login(email: str, password: str) -> USER:
