@@ -3,7 +3,7 @@ from peewee import prefetch
 
 from .app import app
 from .db import USER, database
-from flask_login import LoginManager, login_user, logout_user
+from flask_login import LoginManager, login_user, logout_user, login_required
 
 from flask_wtf import FlaskForm
 from wtforms import StringField, PasswordField
@@ -102,8 +102,11 @@ def login(email: str, password: str) -> USER:
     return user
 
 
+@auth_router.route('/logout')
+@login_required
 def logout():
     logout_user()
+    return redirect(url_for('index.index'))
 
 
 def register(email: str, password: str, first_name: str = "anon", second_name: str = "anon") -> USER:
