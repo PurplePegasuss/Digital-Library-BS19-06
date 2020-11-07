@@ -11,6 +11,7 @@ flask = "^1.1.2"
 flask-admin = "^1.5.6"
 wtf-peewee = "^3.0.2"
 flask-paginate = "^0.7.1"
+flask-login = "^0.5.0"
 
 [tool.poetry.dev-dependencies]
 autopep8 = "^1.5.4"
