@@ -1,0 +1,108 @@
+{% extends '_page.html' %}
+{% block content %}
+    <script>
+        $(document).ready(function () {
+            $('.js-example-basic-multiple').select2({
+                maximumSelectionLength: 4
+            });
+        });
+    </script>
+
+    {# Search form #}
+    <div class = "container mt-4 mb-4">
+        <form id="search-by-tags-form" method="post" role="form">
+            <div class="form-group">
+                <label>Search by content: </label>
+                <input class="form-control" name="text" type="text">
+            </div>
+            <br>
+            <div class="form-group">
+                <label>Search by tags:</label>
+                <select class="js-example-basic-multiple form-control" name="tag" multiple="multiple">
+                    {% for tag in tags_all %}
+                        <option value={{tag.id}}>{{ tag.Name }}</option>
+                    {% endfor %}
+                </select>
+            </div>
+            <button class="button" type="submit">Find</button>
+        </form>
+        {# Message for the user #}
+        {% if request_text or (request_tags|length < tags_all|length and request_tags|length > 0)%}
+            <p class="h5 mt-4">Results
+                {% if request_text %}
+                     for "{{ request_text }}"
+                {% endif %}
+                {% if request_text and (request_tags|length < tags_all|length and request_tags|length > 0)%}
+                     and
+                {% endif %}
+                {% if request_tags|length < tags_all|length and request_tags|length > 0%}
+                    for tags
+                    {% for request_tag in request_tags %}
+                        "{{ request_tag }}"
+                        {% if not loop.last %}
+                            ,
+                        {% endif %}
+                    {% endfor %}
+                {% endif %}
+            are:</p>
+        {% endif %}
+    </div>
+
+    {# Display results. Same as index.html#}
+    <div class="container">
+    <div class = "row">
+    {% for item in materials %}
+        <div class="col-12 col-md-6 mb-4">
+            <div class="card h-100 mt-4 mb-4">
+                <div class="card-body">
+                    {% if item.authors|length > 0 %}
+                        <h6 class="card-text text-secondary">Authors:
+                            {% for author in item.authors %}
+                                {{ author.FullName }}
+                                {% if not loop.last %}
+                                    ;
+                                {% endif %}
+                            {% endfor %}
+                        </h6>
+                        <hr class="hr">
+                    {% endif %}
+                    {% if item.Title %}
+                        <strong>
+                            <h2 class="card-title">
+                                <a class="text-dark" href={{ url_for('index.material_overview', material_id = item.id) }}>{{ item.Title }}</a>
+                            </h2>
+                        </strong>
+                    {% endif %}
+                    {% if item.tags|length > 0 %}
+                        <h5 class="card-text text-secondary">
+                            Tags:
+                            {% for tag in item.tags %}
+                                <a href="" class="badge badge-pill bg-moodle">{{ tag.Name }}</a>
+                            {% endfor %}
+                        </h5>
+                    {% endif %}
+                    {% if  item.tags|length > 0 or item.Title%}
+                        <hr class="hr"/>
+                    {% endif %}
+                    {% if item.Type %}
+                        <small>
+                            <p class="h6">{{ item.Type }}</p>
+                        </small>
+                    {% endif %}
+                    {%  if item.Description %}
+                        <p class="h4">{{ item.Description }}</p>
+                    {% endif %}
+                </div>
+                <div class="card-footer">
+                    <a class="button" href={{ url_for('index.material_overview', material_id = item.id) }}>Go to the material</a>
+                </div>
+            </div>
+        </div>
+    {%  endfor %}
+    </div>
+
+    {# Switcher between pages #}
+    <br>
+    <br>
+    {{ pagination.links }}
+{% endblock %}
