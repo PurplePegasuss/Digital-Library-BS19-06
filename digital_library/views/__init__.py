@@ -2,7 +2,8 @@ from flask import Flask
 from flask_admin import Admin
 
 from .index import index_router
-from .admin import init_flask_admin, auth_router
+from .admin import init_flask_admin
+from .auth import auth_router
 
 
 def create_views(app: Flask, admin: Admin):
