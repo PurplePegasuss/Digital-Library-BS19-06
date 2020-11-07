@@ -1,3 +1,5 @@
+from flask_login import UserMixin
+from peewee import *
 from flask_admin.contrib.peewee import ModelView
 from playhouse.flask_utils import FlaskDB
 from playhouse.hybrid import hybrid_property
@@ -23,7 +25,7 @@ class TAG(BaseModel):
     Name = TextField(unique=True)
 
 
-class USER(BaseModel):
+class USER(BaseModel, UserMixin):  # if a method is implemented in BaseModel then this method is used
     Email = TextField(unique=True)
     FirstName = TextField()
     SecondName = TextField()
@@ -33,6 +35,9 @@ class USER(BaseModel):
     @hybrid_property
     def FullName(self):
         return self.FirstName + ' ' + self.SecondName
+
+    def get_id(self):
+        return str(self.id)
 
 
 class MATERIAL(BaseModel):
