@@ -73,12 +73,6 @@ class ADMIN_RIGHTS(BaseModel):
     users = ManyToManyField(USER, backref='rights')
 
 
-class MATERIAL_AdminView(ModelView):
-    inline_models = (ATTACHMENT, COMMENT, REVIEW)
-
-
-MATERIAL.admin_view = MATERIAL_AdminView
-
 tables = [
     TAG,
     USER,
@@ -93,18 +87,6 @@ tables = [
 ]
 
 
-def init_flask_admin():
-    admin_views = [
-        x.admin_view(x) for x in tables if getattr(x, 'admin_view', None)
-    ]
-    admin_views.extend([
-        ModelView(MATERIAL.tags.get_through_model()),
-        ModelView(MATERIAL.authors.get_through_model()),
-        ModelView(ADMIN_RIGHTS.users.get_through_model()),
-    ])
-    for view in admin_views:
-        admin.add_view(view)
-
 
 def create_tables():
     with database:
@@ -112,5 +94,3 @@ def create_tables():
 
 
 create_tables()
-
-init_flask_admin()
