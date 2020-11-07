@@ -1,0 +1,32 @@
+{% extends '_page.html' %}
+{% block content %}
+<div>
+    <form action='/register' method='POST'>
+        <div class="form-group">
+            <label for="firstName">First Name</label>
+            <input type="text" name="first_name" class="form-control" id="firstName">
+        </div>
+        <div class="form-group">
+            <label for="secondName">Second Name</label>
+            <input type="text" name="second_name" class="form-control" id="secondName">
+        </div>
+        <div class="form-group">
+            <label for="InputEmail">Email address</label>
+            <input type="email" placeholder="name@example.com" name="email" class="form-control" id="InputEmail">
+        </div>
+        <div class="form-group">
+            <label for="InputPassword">Password</label>
+            <input type="password" name="password" class="form-control" id="InputPassword" required>
+        </div>
+         <div class="control-group">
+          <!-- Password-->
+          <label class="control-label" for="password">Password</label>
+          <div class="controls">
+            <input type="password" id="password" name="password" placeholder="" class="input-xlarge">
+            <p class="help-block">Password should be at least 4 characters</p>
+          </div>
+        </div>
+        <button type="submit" class="btn btn-primary">Register</button>
+    </form>
+</div>
+{% endblock %}
