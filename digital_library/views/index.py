@@ -47,56 +47,86 @@ def index():
 def search():
     # If a user presses the search button
     if request.method == 'POST':
-        text = request.form.get('text')
-
-        tag_ids = request.form.getlist('tag')
-        tag_names = [TAG[i].Name for i in tag_ids]
-
+        text_requested = request.form.get('text')
+        tag_names = [TAG[i].Name for i in request.form.getlist('tag')]
         return redirect(url_for(
             "index.search",
-            text=text,
+            text=text_requested,
             tag=tag_names
         ))
 
     tags_all = [t for t in TAG.select().order_by(TAG.Name)]
-
-    text = request.args.get('text', '').lower().strip()
+    text_requested = request.args.get('text', '').lower().strip()
     tags_names = request.args.getlist('tag')
 
-    # If no tags are chosen, searching is done by any tag
+    # These tags are found by tags
     if not tags_names:
+        # If no tags are chosen, searching is done by any tag
         tags_names = [t.Name for t in tags_all]
+        by_tags = set(m.id for m in MATERIAL.select())
+    else:
+        # TODO: Certain tags are selected
+        tags_requested = (
+            TAG
+            .select()
+            .where(TAG.Name.in_(tags_names))
+        )
+        tags_requested_id = [t.id for t in tags_requested]
+        # =================================================
+        materials_candidate_by_tags = (
+            MATERIAL.tags
+            .get_through_model()
+            .select()
+            .distinct()
+            .where(
+                MATERIAL
+                .tags
+                .get_through_model()
+                .tag_id
+                .in_(tags_requested_id)
+            )
+        )
+        by_tags = set()
+        for m in materials_candidate_by_tags:
+            mat_id = m.material_id
+            mat_tags = (
+                MATERIAL
+                .tags
+                .get_through_model()
+                .select()
+                .where(
+                    MATERIAL.tags
+                    .get_through_model()
+                    .material_id == mat_id
+                )
+            )
+            mat_tags_id = set(m.tag_id for m in mat_tags)
 
-    # These tags are selected by user
-    candidate_tags = (
-        TAG
-        .select()
-        .where(TAG.Name.in_(tags_names))
-    )
+            if set(tags_requested_id).issubset(mat_tags_id):
+                by_tags.add(mat_id)
+        # =================================================
 
-    # These materials contain "Text"
-    candidate_by_desc_materials = (
+    # Select materials that are found by text
+    materials_candidate_by_desc = (
         MATERIAL
         .select()
         .where(
-            MATERIAL.Title.contains(text) |
-            MATERIAL.Description.contains(text)
+            MATERIAL.Title.contains(text_requested)
+            | MATERIAL.Description.contains(text_requested)
         )
     )
+    by_desc = set(m.id for m in materials_candidate_by_desc)
 
-    candidate_users = (
+    # Select materials which authors are found
+    authors_candidate = (
         USER
         .select()
         .where(
-            USER.FullName.contains(text)
+            USER.FullName.contains(text_requested)
         )
     )
-
-    candidate_tags_id = [t.id for t in candidate_tags]
-    candidate_users_id = [u.id for u in candidate_users]
-
-    # These materials have candidate authors
-    candidates_by_author = (
+    authors_candidate_id = [u.id for u in authors_candidate]
+    materials_candidate_by_author = (
         MATERIAL.authors
         .get_through_model()
         .select()
@@ -104,43 +134,17 @@ def search():
             MATERIAL.authors
             .get_through_model()
             .user_id
-            .in_(candidate_users_id)
+            .in_(authors_candidate_id)
         )
     )
-
-    # TODO: 'MATERIAL.tags' should be a subset of 'candidate_tags_id', not just in_
-    # These materials have selected tags
-    candidates_by_tag = (
-        MATERIAL.tags
-        .get_through_model()
-        .select()
-        .where(
-            MATERIAL.tags
-            .get_through_model()
-            .tag_id
-            .in_(candidate_tags_id)
-        )
-    )
-
-    # "Text" is found in the title/description of a material
-    candidate_materials_1_id = set(m.id for m in candidate_by_desc_materials)
-
-    # "Text" is found in authors' FullName
-    candidate_materials_2_id = set(m.material_id for m in candidates_by_author)
-
-    # Those tags are selected
-    candidate_materials_3_id = set(m.material_id for m in candidates_by_tag)
+    by_author = set(m.material_id for m in materials_candidate_by_author)
 
     # These materials are found
-    materials_requested_id = (
-        candidate_materials_3_id &
-        (candidate_materials_1_id | candidate_materials_2_id)
-    )
     material_requested = (
         MATERIAL
         .select()
         .where(
-            MATERIAL.id.in_(materials_requested_id)
+            MATERIAL.id.in_(by_tags & (by_desc | by_author))
         )
         .prefetch(
             MATERIAL.tags.get_through_model(),
@@ -176,7 +180,7 @@ def search():
         materials=material_page,
         pagination=pagination,
         page=page,
-        request_text=text,
+        request_text=text_requested,
         request_tags=tags_names
     )
 
