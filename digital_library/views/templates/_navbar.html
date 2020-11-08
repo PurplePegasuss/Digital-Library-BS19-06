@@ -26,5 +26,11 @@
             {% endblock %}
         </div>
     </div>
+    {% if current_user.is_authenticated %}
+        <span class="label">current_user.name</span>
+    {% else %}
+        <a class="nav-link {% if page == active_page %}active{% endif %}" href={{ '/login' }}>Sign in</a>
+    {% endif %}
+
     {%  endblock %}
 </nav>

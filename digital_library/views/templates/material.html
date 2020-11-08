@@ -17,22 +17,22 @@
                     </p>
                 </div>
                 <div class="col-sm-6" style="background-color:white;">
-                    <h5><font size="6">{{ material.Title }}</font></h5>
+                    <h5><span style="font-size: x-large; ">{{ material.Title }}</span></h5>
                         <div>
-                            <h5 class="card-text text-secondary"><font size="4">
+                            <h5 class="card-text text-secondary"><span style="font-size: medium; ">
                                 <strong>Tags</strong>:
                                 {% for tag in material.tags %}
                                     <a href="" class="badge badge-pill bg-moodle">{{ tag.Name }}</a>
                                 {% endfor %}
-                            </font></h5>
-                            <h6><font size="4">{{ material.Type }}</font></h6>
+                            </span></h5>
+                            <h6><span style="font-size: medium; ">{{ material.Type }}</span></h6>
                             <br />
-                            <h5><font size="5"><strong>Description:</strong> {{ material.Description }}</font></h5>
-                            <h5 class="card-text text-secondary"><font size="4"><strong>Authors</strong>:
+                            <h5><span style="font-size: large; "><strong>Description:</strong> {{ material.Description }}</span></h5>
+                            <h5 class="card-text text-secondary"><span style="font-size: medium; "><strong>Authors</strong>:
                                 {% for author in material.authors %}
                                     {{author.FullName }};
                                 {% endfor %}
-                            </font></h5>
+                            </span></h5>
                         </div>
                 </div>
             </div>
