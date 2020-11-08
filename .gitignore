@@ -5,6 +5,8 @@ __pycache__
 .vscode
 
 /data/*
-!/data/.gitkeep
+!/data/static
+/data/static/uploads/*
+!.gitkeep
 
 /venv

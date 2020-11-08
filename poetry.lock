@@ -220,7 +220,7 @@ locale = ["Babel (>=1.3)"]
 [metadata]
 lock-version = "1.1"
 python-versions = "^3.8"
-content-hash = "eceda75e612cd0bc5f6bb586d007879762d5dfe220a5a56749a6c660c9579d22"
+content-hash = "21b2e4d4d68556effdd99df46155251d9e757cf3612a04f0982f8867a9060197"
 
 [metadata.files]
 autopep8 = [
