@@ -1,29 +1,23 @@
+{% from "_formhelpers.html" import render_field %}
 {% extends '_page.html' %}
 
 {% block content %}
     <form action='/register' method='POST'>
         <div class="container">
+            {{ form.csrf_token }}
             <h2>Register</h2>
             <hr>
             <div class="form-group">
-                <label for="firstName">First Name</label>
-                <input type="text" name="first_name" class="form-control" id="firstName">
+                {{ render_field(form.first_name) }}
             </div>
             <div class="form-group">
-                <label for="secondName">Second Name</label>
-                <input type="text" name="second_name" class="form-control" id="secondName">
+                {{ render_field(form.second_name) }}
             </div>
             <div class="form-group">
-                <label for="inputEmail">Email address</label>
-                <input type="email" placeholder="name@example.com" name="email" class="form-control" id="inputEmail">
+                {{ render_field(form.email) }}
             </div>
             <div class="form-group">
-                <label for="inputPassword">Password</label>
-                <input type="password" name="password" class="form-control" id="inputPassword" required>
-            </div>
-            <div class="form-group">
-                <label for="repeatPassword">Repeat Password</label>
-                <input type="password" name="password" class="form-control" id="repeatPassword" required>
+                {{ render_field(form.password) }}
             </div>
             <button type="submit" class="registerbtn">Register</button>
             <div class="container signin">
