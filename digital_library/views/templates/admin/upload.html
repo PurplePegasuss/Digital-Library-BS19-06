@@ -1,3 +1,4 @@
+{% from "_formhelpers.html" import render_field %}
 {% extends 'admin/master.html' %}
 {% block body %}
 
@@ -11,8 +12,7 @@
     <form method="POST" enctype="multipart/form-data">
       <div class="form-group">
         {{  form.csrf_token }}
-        <label for="{{ form.upload.id }}">{{ form.upload.label.text }}</label>
-        {{ form.upload }}
+        {{ render_field(form.upload) }}
       </div>
 
       <button type="submit" class="btn btn-primary">Submit</button>
