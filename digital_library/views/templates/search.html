@@ -1,11 +1,26 @@
 {% extends '_page.html' %}
 {% block content %}
     <script>
-        $(document).ready(function () {
-            $('.js-example-basic-multiple').select2({
-                maximumSelectionLength: 4
-            });
-        });
+        $(document).ready(
+            function () {
+                const urlParams = new URLSearchParams(window.location.search);
+                const text = urlParams.get('text');
+                var tags = urlParams.getAll('tag');
+                var tag_ids = [];
+                $("#tags_select > option").each(function() {
+                        if(tags.includes(this.text)){
+                            tag_ids.push(this.value);
+                        }
+                    }
+                );
+                $('.js-example-basic-multiple').select2().val(tag_ids);
+                $('.js-example-basic-multiple').select2().trigger('change');
+                document.getElementById("text").value = text;
+                $('.js-example-basic-multiple').select2({
+                    maximumSelectionLength: 4
+                });
+            }
+        );
     </script>
 
     {# Search form #}
@@ -13,12 +28,12 @@
         <form id="search-by-tags-form" method="post" role="form">
             <div class="form-group">
                 <label>Search by content: </label>
-                <input class="form-control" name="text" type="text">
+                <input class="form-control" name="text" type="text" id="text">
             </div>
             <br>
             <div class="form-group">
                 <label>Search by tags:</label>
-                <select class="js-example-basic-multiple form-control" name="tag" multiple="multiple">
+                <select id="tags_select" class="js-example-basic-multiple form-control" name="tag" multiple="multiple">
                     {% for tag in tags_all %}
                         <option value={{tag.id}}>{{ tag.Name }}</option>
                     {% endfor %}
@@ -31,6 +46,7 @@
             <p class="h5 mt-4">Results
                 {% if request_text %}
                      for "{{ request_text }}"
+
                 {% endif %}
                 {% if request_text and (request_tags|length < tags_all|length and request_tags|length > 0)%}
                      and
@@ -77,7 +93,7 @@
                         <h5 class="card-text text-secondary">
                             Tags:
                             {% for tag in item.tags %}
-                                <a href="" class="badge badge-pill bg-moodle">{{ tag.Name }}</a>
+                                <a href="/search?text=&tag={{ tag.Name }}" class="badge badge-pill bg-moodle">{{ tag.Name }}</a>
                             {% endfor %}
                         </h5>
                     {% endif %}

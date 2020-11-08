@@ -22,7 +22,7 @@
                             <h5 class="card-text text-secondary"><span style="font-size: medium; ">
                                 <strong>Tags</strong>:
                                 {% for tag in material.tags %}
-                                    <a href="" class="badge badge-pill bg-moodle">{{ tag.Name }}</a>
+                                    <a href="/search?text=&tag={{ tag.Name }}" class="badge badge-pill bg-moodle">{{ tag.Name }}</a>
                                 {% endfor %}
                             </span></h5>
                             <h6><span style="font-size: medium; ">{{ material.Type }}</span></h6>
