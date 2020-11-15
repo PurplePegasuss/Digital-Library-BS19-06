@@ -13,3 +13,5 @@ SESSION_PROTECTION = "strong"
 UPLOAD_PATH = Path(os.environ.get('UPLOADS_PATH', Path(__file__).parent / 'static' / 'uploads'))
 assert UPLOAD_PATH.exists()
 assert str(UPLOAD_PATH).startswith(str((Path(__file__).parent / 'static')))
+
+ROOT_PASSWORD = os.environ.get('ROOT_PASSWORD', 'qwerty')  # ¯\_(ツ)_/¯
