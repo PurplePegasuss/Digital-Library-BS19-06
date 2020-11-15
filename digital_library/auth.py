@@ -1,10 +1,12 @@
+import functools
 from hashlib import sha512
 from peewee import prefetch
 
 from .app import app
 from .cfg import ROOT_PASSWORD
 from .db import USER, database, ADMIN_RIGHTS
-from flask_login import LoginManager, login_user, logout_user, login_required
+from flask_login import LoginManager, login_user, logout_user, login_required, current_user
+from flask import abort
 
 from flask_wtf import FlaskForm
 from wtforms import StringField, PasswordField
@@ -90,7 +92,7 @@ permissions = [
 def init_permissions():
     with database.atomic():
         root, _ = USER.get_or_create(Email='root@root.root', FirstName='Admin', SecondName='Root',
-                                  PasswordHash=_hash_password(ROOT_PASSWORD))
+                                     PasswordHash=_hash_password(ROOT_PASSWORD))
         root.PasswordHash = _hash_password(ROOT_PASSWORD)
 
         root.rights.clear()
@@ -102,3 +104,22 @@ def init_permissions():
 
 
 init_permissions()
+
+
+def has_permission(permission: str):
+    if not current_user.is_authenticated:
+        return False
+    return permission in [x.Description for x in current_user.rights]
+
+
+def permission_required(permission: str):
+    def decorator(func):
+        @functools.wraps(func)
+        def wrapper(*args, **kwargs):
+            if has_permission(permission):
+                return func(*args, **kwargs)
+            abort(401, 'Unauthorized')
+
+        return wrapper
+
+    return decorator

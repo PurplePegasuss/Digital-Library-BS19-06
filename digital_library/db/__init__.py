@@ -15,7 +15,7 @@ database = db_wrapper.database
 
 
 class BaseModel(db_wrapper.Model):
-    admin_view = ModelView
+    admin_view = None
 
 
 # `id` field is created by peewee
@@ -90,7 +90,6 @@ tables = [
     ADMIN_RIGHTS,
     ADMIN_RIGHTS.users.get_through_model(),
 ]
-
 
 
 def create_tables():
