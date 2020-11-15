@@ -30,7 +30,7 @@
                         <h5 class="card-text text-secondary">
                             Tags:
                             {% for tag in item.tags %}
-                                <a href="" class="badge badge-pill bg-moodle">{{ tag.Name }}</a>
+                                <a href="/search?text=&tag={{ tag.Name }}" class="badge badge-pill bg-moodle">{{ tag.Name }}</a>
                             {% endfor %}
                         </h5>
                     {% endif %}

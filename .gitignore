@@ -8,5 +8,6 @@ __pycache__
 !/data/static
 /data/static/uploads/*
 !.gitkeep
+/digital_library/static
 
 /venv

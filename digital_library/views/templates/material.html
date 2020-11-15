@@ -5,24 +5,13 @@
         <p></p>
         <div class="col-md-12 col-md-6 mb-4">
             <div class="row">
-                <div class="col-sm-4" style="background-color:antiquewhite;">
-                    <p class="text-center">
-                        {% if material.attachments|length %}
-                            {% for attachment in material.attachments %}
-                            <a href={{ attachment.Url }} > Download {{ attachment.Type }} attachment</a>
-                            {% endfor %}
-                        {% else %}
-                            No attachments found
-                        {% endif %}
-                    </p>
-                </div>
                 <div class="col-sm-6" style="background-color:white;">
                     <h5><span style="font-size: x-large; ">{{ material.Title }}</span></h5>
                         <div>
                             <h5 class="card-text text-secondary"><span style="font-size: medium; ">
                                 <strong>Tags</strong>:
                                 {% for tag in material.tags %}
-                                    <a href="" class="badge badge-pill bg-moodle">{{ tag.Name }}</a>
+                                    <a href="/search?text=&tag={{ tag.Name }}" class="badge badge-pill bg-moodle">{{ tag.Name }}</a>
                                 {% endfor %}
                             </span></h5>
                             <h6><span style="font-size: medium; ">{{ material.Type }}</span></h6>
@@ -39,6 +28,43 @@
         </div>
     </div>
 
+    {# Attachment part #}
+    <div class="container">
+        {% if material.attachments|length %}
+            {% for attachment in material.attachments %}
+
+                {% if attachment.Type == "video" %}
+
+                    {% if "www.youtube.com" in attachment.Url %}
+
+                        {% if "www.youtube.com/embed/" in attachment.Url %}
+                            <div class="row h-100 justify-content-center" style="padding: 10px;">
+                                <iframe width="100%" height="500" align="middle" src={{ attachment.Url }} frameborder="0" allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture" allowfullscreen onload="autoResize(this);"></iframe>
+                            </div>
+                        {% endif %}
+
+                        {% if "www.youtube.com/watch?v=" in attachment.Url %}
+                            <div class="row h-100 justify-content-center" style="padding: 10px;">
+                            <iframe width="100%" height="500" align="middle" src={{ "https://www.youtube.com/embed/" + attachment.Url.split("=")[1] }} frameborder="0" allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture" allowfullscreen onload="autoResize(this);"></iframe>
+                            </div>
+                        {% endif %}
+
+                    {% endif %}
+
+                {% elif attachment.Type == "image" %}
+                    <div class="row justify-content-center" style="padding: 10px;">
+                        <img src={{ attachment.Url }} alt="image">
+                    </div>
+                {% else %}
+                    <div class="row justify-content-center">
+                        <a href={{ attachment.Url }} > Download {{ attachment.Type }} attachment</a>
+                    </div>
+                {% endif %}
+            {% endfor %}
+        {% else %}
+            No attachments found
+        {% endif %}
+    </div>
     {# Comment section part#}
     <div class = "container">
         <div class="row mb-4">
