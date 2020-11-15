@@ -91,8 +91,9 @@ permissions = [
 
 def init_permissions():
     with database.atomic():
-        root, _ = USER.get_or_create(Email='root@root.root', FirstName='Admin', SecondName='Root',
-                                     PasswordHash=_hash_password(ROOT_PASSWORD))
+        root, _ = USER.get_or_create(Email='root@root.root')
+        root.FirstName = 'admin'
+        root.SecondName = 'root'
         root.PasswordHash = _hash_password(ROOT_PASSWORD)
 
         root.rights.clear()
