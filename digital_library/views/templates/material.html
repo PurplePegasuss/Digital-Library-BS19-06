@@ -22,6 +22,9 @@
                                     {{author.FullName }};
                                 {% endfor %}
                             </span></h5>
+                            <h5 class="card-text text-secondary"><span style="font-size: medium; ">
+                                <a class="button" href={{ url_for('index.material_reviews', material_id = material.id) }}>Reviews</a>
+                            </span></h5>
                         </div>
                 </div>
             </div>
