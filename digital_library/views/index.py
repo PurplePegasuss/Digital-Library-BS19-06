@@ -245,3 +245,62 @@ def material_overview(material_id=None):
                            pagination=pagination,
                            page=page,
                            comments_per_page=current_app.config["COMMENTS_PER_PAGE"])
+
+
+@index_router.route('/material/<int:material_id>/reviews', methods=['GET', 'POST'])
+def material_reviews(material_id=None):
+    if (material_id is None) or (not MATERIAL.select().where(MATERIAL.id == material_id).exists()):
+        abort(404, "No such material exists!")
+
+    try:
+        # Retrieve the material from DB
+        # This object can be used in templates as material.<attribute_name>
+        material = (MATERIAL
+                    .select()
+                    .where(MATERIAL.id == material_id)
+                    .prefetch(ATTACHMENT,
+                              MATERIAL.tags.get_through_model(),
+                              MATERIAL.authors.get_through_model(),
+                              REVIEW
+                              )
+                    )[0]
+    except (MATERIAL.DoesNotExist, IndexError):
+        abort(404, "No such material exists!")
+        return
+
+    # Retrieving comment page number. It is 1 by default.
+    try:
+        page = int(request.args.get('page', 1))
+        if page < 1:
+            abort(400, description="The page number can't be less than 1")
+            return
+    except ValueError:
+        abort(404, description='Page is not found')
+        return
+
+    # Retrieve reviews on this material
+    reviews_all = (REVIEW
+                   .select()
+                   .join(USER, on=(REVIEW.author == USER.id))
+                   .where(REVIEW.reviewed_material == material_id)
+                   )
+
+    # Get the necessary slice
+    review_page = reviews_all.paginate(page, current_app.config['REVIEWS_PER_PAGE'])
+
+    # Create pagination
+    pagination = Pagination(
+        per_page=current_app.config['COMMENTS_PER_PAGE'],
+        total=reviews_all.count(),
+        page=page,
+        bs_version=4,
+        record_name='Comments',
+        alignment='center'
+    )
+
+    return render_template('material_reviews.html',
+                           material=material,
+                           comments=review_page,
+                           pagination=pagination,
+                           page=page,
+                           comments_per_page=current_app.config["COMMENTS_PER_PAGE"])
