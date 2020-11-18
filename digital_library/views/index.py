@@ -195,7 +195,7 @@ def page_not_found(message):
     return render_template('handler404.html', data=message), 404
 
 
-@index_router.route('/material/<int:material_id>')
+@index_router.route('/material/<int:material_id>', methods=['GET', 'POST'])
 def material_overview(material_id=None):
     if (material_id is None) or (not MATERIAL.select().where(MATERIAL.id == material_id).exists()):
         abort(404, "No such material exists!")
@@ -244,23 +244,19 @@ def material_overview(material_id=None):
         alignment='center'
     )
 
+    form = None
+    if curr_user.is_authenticated:
+        form = CommentForm()
+        if form.validate_on_submit():
+            text = form.text.data
+            with database.atomic() as transaction:
+                comment = COMMENT.create(Text=text, commented_material=material_id, author=curr_user)
+
     return render_template('material.html',
                            material=material,
                            comments=comment_page,
                            pagination=pagination,
                            page=page,
-                           comments_per_page=current_app.config["COMMENTS_PER_PAGE"])
+                           comments_per_page=current_app.config["COMMENTS_PER_PAGE"],
+                           form=form)
 
-
-@index_router.route('/material/<int:material_id>', methods=['POST'])
-@login_required
-def post_comment(material_id=None):
-    if (material_id is None) or (not MATERIAL.select().where(MATERIAL.id == material_id).exists()):
-        abort(404, "No such material exists!")
-
-    form = CommentForm()
-    if form.validate_on_submit():
-        text = form.text.data
-        with database.atomic() as transaction:
-            comment = COMMENT.create(Text=text, commented_material=material_id, author=curr_user)
-    return redirect(url_for('index.material_overview'))
