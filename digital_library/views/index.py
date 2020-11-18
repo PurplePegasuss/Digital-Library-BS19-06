@@ -1,8 +1,13 @@
+import flask_login
 from flask import Blueprint, render_template, current_app, request, abort, redirect, url_for
+from flask_login import login_required
 from flask_paginate import Pagination
 from digital_library.db import *
+from digital_library.views.forms import CommentForm
 
 index_router = Blueprint('index', __name__, template_folder='templates')
+
+curr_user = flask_login.current_user
 
 
 @index_router.route('/')
@@ -18,14 +23,14 @@ def index():
     # Retrieve all the materials
     material_all = (
         MATERIAL
-        .select()
-        .prefetch(MATERIAL.tags.get_through_model(),
-                  MATERIAL.authors.get_through_model())
+            .select()
+            .prefetch(MATERIAL.tags.get_through_model(),
+                      MATERIAL.authors.get_through_model())
     )
 
     # Extract the necessary slice
     per_page = current_app.config['MATERIALS_PER_PAGE']
-    material_page = material_all[(page - 1)*per_page:page*per_page]
+    material_page = material_all[(page - 1) * per_page:page * per_page]
 
     # Create pagination
     pagination = Pagination(
@@ -68,22 +73,22 @@ def search():
         # TODO: Certain tags are selected
         tags_requested = (
             TAG
-            .select()
-            .where(TAG.Name.in_(tags_names))
+                .select()
+                .where(TAG.Name.in_(tags_names))
         )
         tags_requested_id = [t.id for t in tags_requested]
         # =================================================
         materials_candidate_by_tags = (
             MATERIAL.tags
-            .get_through_model()
-            .select()
-            .distinct()
-            .where(
-                MATERIAL
-                .tags
                 .get_through_model()
-                .tag_id
-                .in_(tags_requested_id)
+                .select()
+                .distinct()
+                .where(
+                MATERIAL
+                    .tags
+                    .get_through_model()
+                    .tag_id
+                    .in_(tags_requested_id)
             )
         )
         by_tags = set()
@@ -91,10 +96,10 @@ def search():
             mat_id = m.material_id
             mat_tags = (
                 MATERIAL
-                .tags
-                .get_through_model()
-                .select()
-                .where(
+                    .tags
+                    .get_through_model()
+                    .select()
+                    .where(
                     MATERIAL.tags
                     .get_through_model()
                     .material_id == mat_id
@@ -109,8 +114,8 @@ def search():
     # Select materials that are found by text
     materials_candidate_by_desc = (
         MATERIAL
-        .select()
-        .where(
+            .select()
+            .where(
             MATERIAL.Title.contains(text_requested)
             | MATERIAL.Description.contains(text_requested)
         )
@@ -120,21 +125,21 @@ def search():
     # Select materials which authors are found
     authors_candidate = (
         USER
-        .select()
-        .where(
+            .select()
+            .where(
             USER.FullName.contains(text_requested)
         )
     )
     authors_candidate_id = [u.id for u in authors_candidate]
     materials_candidate_by_author = (
         MATERIAL.authors
-        .get_through_model()
-        .select()
-        .where(
-            MATERIAL.authors
             .get_through_model()
-            .user_id
-            .in_(authors_candidate_id)
+            .select()
+            .where(
+            MATERIAL.authors
+                .get_through_model()
+                .user_id
+                .in_(authors_candidate_id)
         )
     )
     by_author = set(m.material_id for m in materials_candidate_by_author)
@@ -142,11 +147,11 @@ def search():
     # These materials are found
     material_requested = (
         MATERIAL
-        .select()
-        .where(
+            .select()
+            .where(
             MATERIAL.id.in_(by_tags & (by_desc | by_author))
         )
-        .prefetch(
+            .prefetch(
             MATERIAL.tags.get_through_model(),
             MATERIAL.authors.get_through_model()
         )
@@ -245,3 +250,17 @@ def material_overview(material_id=None):
                            pagination=pagination,
                            page=page,
                            comments_per_page=current_app.config["COMMENTS_PER_PAGE"])
+
+
+@index_router.route('/material/<int:material_id>', methods=['POST'])
+@login_required
+def post_comment(material_id=None):
+    if (material_id is None) or (not MATERIAL.select().where(MATERIAL.id == material_id).exists()):
+        abort(404, "No such material exists!")
+
+    form = CommentForm()
+    if form.validate_on_submit():
+        text = form.text.data
+        with database.atomic() as transaction:
+            comment = COMMENT.create(Text=text, commented_material=material_id, author=curr_user)
+    return redirect(url_for('index.material_overview'))
