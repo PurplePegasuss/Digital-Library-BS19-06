@@ -285,7 +285,10 @@ def material_reviews(material_id=None):
                    .where(REVIEW.reviewed_material == material_id)
                    )
 
-    rating_avg = sum([r.Rating for r in reviews_all])/reviews_all.count()
+    try:
+        rating_avg = sum([r.Rating for r in reviews_all])/reviews_all.count()
+    except ZeroDivisionError:
+        rating_avg = None
 
     # Get the necessary slice
     review_page = reviews_all.paginate(page, current_app.config['REVIEWS_PER_PAGE'])
