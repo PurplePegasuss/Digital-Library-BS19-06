@@ -285,6 +285,8 @@ def material_reviews(material_id=None):
                    .where(REVIEW.reviewed_material == material_id)
                    )
 
+    rating_avg = sum([r.Rating for r in reviews_all])/reviews_all.count()
+
     # Get the necessary slice
     review_page = reviews_all.paginate(page, current_app.config['REVIEWS_PER_PAGE'])
 
@@ -300,7 +302,8 @@ def material_reviews(material_id=None):
 
     return render_template('material_reviews.html',
                            material=material,
-                           comments=review_page,
+                           reviews=review_page,
                            pagination=pagination,
                            page=page,
-                           comments_per_page=current_app.config["COMMENTS_PER_PAGE"])
+                           reviews_per_page=current_app.config["REVIEWS_PER_PAGE"],
+                           rating_avg=rating_avg)

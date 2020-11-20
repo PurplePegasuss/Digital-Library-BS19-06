@@ -81,14 +81,14 @@
         </div>
 
         <div class="row">
-            {% for comment in comments %}
+            {% for review in reviews %}
                 <div class="col-12">
                     <div class="card d-flex mb-4 mt-4">
                         <div class="card-body">
-                            {% if comment.author %}
+                            {% if review.author %}
                                 <p class="h6 text-secondary">
                                     <img src="#" alt="User" height="20" width="20" vspace="5" hspace="5"/>
-                                    {{ comment.author.FullName }}
+                                    {{ review.author.FullName }}
                                 </p>
                             {% endif %}
                             <div class="rate">
@@ -105,8 +105,8 @@
                             </div>
                             <br>
                             <br>
-                            {% if comment.Text %}
-                                <p class="h3">{{ comment.Text }}</p>
+                            {% if review.Text %}
+                                <p class="h3">{{ review.Text }}</p>
                             {% endif %}
                         </div>
                     </div>
