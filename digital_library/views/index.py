@@ -250,7 +250,7 @@ def material_overview(material_id=None):
         if form.validate_on_submit():
             text = form.text.data
             with database.atomic() as transaction:
-                comment = COMMENT.create(Text=text, commented_material=material_id, author=curr_user)
+                comment = COMMENT.create(Text=text, commented_material=material_id, author=curr_user.id)
 
     return render_template('material.html',
                            material=material,
