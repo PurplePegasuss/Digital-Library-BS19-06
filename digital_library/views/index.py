@@ -1,9 +1,13 @@
+import flask_login
 from flask import Blueprint, render_template, current_app, request, abort, redirect, url_for
 from flask_login import login_required
 from flask_paginate import Pagination
 from digital_library.db import *
+from digital_library.views.forms import CommentForm
 
 index_router = Blueprint('index', __name__, template_folder='templates')
+
+curr_user = flask_login.current_user
 
 
 @index_router.route('/')
@@ -27,7 +31,7 @@ def index():
 
     # Extract the necessary slice
     per_page = current_app.config['MATERIALS_PER_PAGE']
-    material_page = material_all[(page - 1)*per_page:page*per_page]
+    material_page = material_all[(page - 1) * per_page:page * per_page]
 
     # Create pagination
     pagination = Pagination(
@@ -193,7 +197,7 @@ def page_not_found(message):
     return render_template('handler404.html', data=message), 404
 
 
-@index_router.route('/material/<int:material_id>')
+@index_router.route('/material/<int:material_id>', methods=['GET', 'POST'])
 @login_required
 def material_overview(material_id=None):
     if (material_id is None) or (not MATERIAL.select().where(MATERIAL.id == material_id).exists()):
@@ -231,7 +235,8 @@ def material_overview(material_id=None):
                     )
 
     # Get the necessary slice
-    comment_page = comments_all.paginate(page, current_app.config['COMMENTS_PER_PAGE'])
+    comment_page = comments_all.paginate(
+        page, current_app.config['COMMENTS_PER_PAGE'])
 
     # Create pagination
     pagination = Pagination(
@@ -243,12 +248,22 @@ def material_overview(material_id=None):
         alignment='center'
     )
 
+    form = None
+    if curr_user.is_authenticated:
+        form = CommentForm()
+        if form.validate_on_submit():
+            text = form.text.data
+            with database.atomic() as transaction:
+                comment = COMMENT.create(
+                    Text=text, commented_material=material_id, author=curr_user.id)
+
     return render_template('material.html',
                            material=material,
                            comments=comment_page,
                            pagination=pagination,
                            page=page,
-                           comments_per_page=current_app.config["COMMENTS_PER_PAGE"])
+                           comments_per_page=current_app.config["COMMENTS_PER_PAGE"],
+                           form=form)
 
 
 @index_router.route('/material/<int:material_id>/reviews', methods=['GET', 'POST'])
@@ -295,7 +310,8 @@ def material_reviews(material_id=None):
         rating_avg = None
 
     # Get the necessary slice
-    review_page = reviews_all.paginate(page, current_app.config['REVIEWS_PER_PAGE'])
+    review_page = reviews_all.paginate(
+        page, current_app.config['REVIEWS_PER_PAGE'])
 
     # Create pagination
     pagination = Pagination(
