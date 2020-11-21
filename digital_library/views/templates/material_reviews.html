@@ -1,11 +1,11 @@
 {% extends '_page.html' %}
 {% block content %}
     {# Overview part #}
-    <div class="container" xmlns="http://www.w3.org/1999/html">
+    <div class="container">
         <p></p>
-        <div class="mb-4">
+        <div class="col-md-12 col-md-6 mb-4">
             <div class="row">
-                <div class="sm-6" style="background-color:white;">
+                <div class="col-sm-6" style="background-color:white;">
                     <h5><span style="font-size: x-large; ">{{ material.Title }}</span></h5>
                         <div>
                             <h5 class="card-text text-secondary"><span style="font-size: medium; ">
@@ -15,7 +15,13 @@
                                 {% endfor %}
                             </span></h5>
                             <h6><span style="font-size: medium; ">{{ material.Type }}</span></h6>
-                            <br />
+                            {% if rating_avg %}
+                                {% for i in range(rating_avg|round|int) %}
+                                    <span class="fa fa-star checked"></span>
+                                {% endfor %}
+                            {% endif %}
+                        <br/>
+                        <br/>
                             <h5><span style="font-size: large; "><strong>Description:</strong> {{ material.Description }}</span></h5>
                             <h5 class="card-text text-secondary"><span style="font-size: medium; "><strong>Authors</strong>:
                                 {% for author in material.authors %}
@@ -23,7 +29,7 @@
                                 {% endfor %}
                             </span></h5>
                             <h5 class="card-text text-secondary"><span style="font-size: medium; ">
-                                <a class="button" href={{ url_for('index.material_reviews', material_id = material.id) }}>Reviews</a>
+                                <a class="button" href={{ url_for('index.material_overview', material_id = material.id) }}>Comments</a>
                             </span></h5>
                         </div>
                 </div>
@@ -32,7 +38,7 @@
     </div>
 
     {# Attachment part #}
-    <div class="container" align="center">
+    <div class="container">
         {% if material.attachments|length %}
             {% for attachment in material.attachments %}
 
@@ -42,13 +48,13 @@
 
                         {% if "www.youtube.com/embed/" in attachment.Url %}
                             <div class="row h-100 justify-content-center" style="padding: 10px;">
-                                <iframe width="100%" height="600" align="middle" src={{ attachment.Url }} frameborder="0" allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture" allowfullscreen onload="autoResize(this);"></iframe>
+                                <iframe width="100%" height="500" align="middle" src={{ attachment.Url }} frameborder="0" allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture" allowfullscreen onload="autoResize(this);"></iframe>
                             </div>
                         {% endif %}
 
                         {% if "www.youtube.com/watch?v=" in attachment.Url %}
                             <div class="row h-100 justify-content-center" style="padding: 10px;">
-                            <iframe width="100%" height="600" align="middle" src={{ "https://www.youtube.com/embed/" + attachment.Url.split("=")[1] }} frameborder="0" allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture" allowfullscreen onload="autoResize(this);"></iframe>
+                            <iframe width="100%" height="500" align="middle" src={{ "https://www.youtube.com/embed/" + attachment.Url.split("=")[1] }} frameborder="0" allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture" allowfullscreen onload="autoResize(this);"></iframe>
                             </div>
                         {% endif %}
 
@@ -69,38 +75,41 @@
         {% endif %}
     </div>
     {# Comment section part#}
-    {% if form %}
     <div class = "container">
-        <form method="POST" action="">
+        <div class="row mb-4">
+        </div>
+        <form>
             <div class="form-group">
-                <label>{{ form.csrf_token }}</label>
-                {{ render_field(form.text) }}
+                <textarea class="form-control" name="review" rows="3"></textarea>
             </div>
-            <button type="submit" class="button" >Post</button>
+            <button type="submit" class="button"><p class="h5">Post it</p></button>
         </form>
     </div>
-    {% endif %}
     <div class="container">
+        <div class="row mt-4 mb-4">
+        </div>
+
         <div class="row">
-            {% for comment in comments %}
+            {% for review in reviews %}
                 <div class="col-12">
                     <div class="card d-flex mb-4 mt-4">
                         <div class="card-body">
-                            {% if comment.author %}
+                            {% if review.author %}
                                 <p class="h6 text-secondary">
-                                    <img src="https://www.iconfinder.com/data/icons/metro-uinvert-dock/256/User_Accounts_alt.png" alt="User" height="25" width="25"/>
-                                    {{ comment.author.FullName }}
+                                    <img src="#" alt="User" height="20" width="20" vspace="5" hspace="5"/>
+                                    {{ review.author.FullName }}
                                 </p>
                             {% endif %}
-                            {% if comment.Text %}
-                                <p class="h5">{{ comment.Text }}</p>
+                            {% for i in range(review.Rating) %}
+                                <span class="fa fa-star checked"></span>
+                            {% endfor %}
+                            {% if review.Text %}
+                                <p class="h3">{{ review.Text }}</p>
                             {% endif %}
                         </div>
                     </div>
                 </div>
             {% endfor %}
-        </div>
-              <div class="row mt-4 mb-4">
         </div>
     </div>
 

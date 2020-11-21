@@ -11,6 +11,7 @@ curr_user = flask_login.current_user
 
 
 @index_router.route('/')
+@login_required
 def index():
     # Retrieving material page number. It is 1 by default.
     try:
@@ -23,9 +24,9 @@ def index():
     # Retrieve all the materials
     material_all = (
         MATERIAL
-            .select()
-            .prefetch(MATERIAL.tags.get_through_model(),
-                      MATERIAL.authors.get_through_model())
+        .select()
+        .prefetch(MATERIAL.tags.get_through_model(),
+                  MATERIAL.authors.get_through_model())
     )
 
     # Extract the necessary slice
@@ -49,6 +50,7 @@ def index():
 
 
 @index_router.route('/search', methods=['GET', 'POST'])
+@login_required
 def search():
     # If a user presses the search button
     if request.method == 'POST':
@@ -73,22 +75,22 @@ def search():
         # TODO: Certain tags are selected
         tags_requested = (
             TAG
-                .select()
-                .where(TAG.Name.in_(tags_names))
+            .select()
+            .where(TAG.Name.in_(tags_names))
         )
         tags_requested_id = [t.id for t in tags_requested]
         # =================================================
         materials_candidate_by_tags = (
             MATERIAL.tags
-                .get_through_model()
-                .select()
-                .distinct()
-                .where(
+            .get_through_model()
+            .select()
+            .distinct()
+            .where(
                 MATERIAL
-                    .tags
-                    .get_through_model()
-                    .tag_id
-                    .in_(tags_requested_id)
+                .tags
+                .get_through_model()
+                .tag_id
+                .in_(tags_requested_id)
             )
         )
         by_tags = set()
@@ -96,10 +98,10 @@ def search():
             mat_id = m.material_id
             mat_tags = (
                 MATERIAL
-                    .tags
-                    .get_through_model()
-                    .select()
-                    .where(
+                .tags
+                .get_through_model()
+                .select()
+                .where(
                     MATERIAL.tags
                     .get_through_model()
                     .material_id == mat_id
@@ -114,8 +116,8 @@ def search():
     # Select materials that are found by text
     materials_candidate_by_desc = (
         MATERIAL
-            .select()
-            .where(
+        .select()
+        .where(
             MATERIAL.Title.contains(text_requested)
             | MATERIAL.Description.contains(text_requested)
         )
@@ -125,21 +127,21 @@ def search():
     # Select materials which authors are found
     authors_candidate = (
         USER
-            .select()
-            .where(
+        .select()
+        .where(
             USER.FullName.contains(text_requested)
         )
     )
     authors_candidate_id = [u.id for u in authors_candidate]
     materials_candidate_by_author = (
         MATERIAL.authors
-            .get_through_model()
-            .select()
-            .where(
+        .get_through_model()
+        .select()
+        .where(
             MATERIAL.authors
-                .get_through_model()
-                .user_id
-                .in_(authors_candidate_id)
+            .get_through_model()
+            .user_id
+            .in_(authors_candidate_id)
         )
     )
     by_author = set(m.material_id for m in materials_candidate_by_author)
@@ -147,11 +149,11 @@ def search():
     # These materials are found
     material_requested = (
         MATERIAL
-            .select()
-            .where(
+        .select()
+        .where(
             MATERIAL.id.in_(by_tags & (by_desc | by_author))
         )
-            .prefetch(
+        .prefetch(
             MATERIAL.tags.get_through_model(),
             MATERIAL.authors.get_through_model()
         )
@@ -196,6 +198,7 @@ def page_not_found(message):
 
 
 @index_router.route('/material/<int:material_id>', methods=['GET', 'POST'])
+@login_required
 def material_overview(material_id=None):
     if (material_id is None) or (not MATERIAL.select().where(MATERIAL.id == material_id).exists()):
         abort(404, "No such material exists!")
@@ -232,7 +235,8 @@ def material_overview(material_id=None):
                     )
 
     # Get the necessary slice
-    comment_page = comments_all.paginate(page, current_app.config['COMMENTS_PER_PAGE'])
+    comment_page = comments_all.paginate(
+        page, current_app.config['COMMENTS_PER_PAGE'])
 
     # Create pagination
     pagination = Pagination(
@@ -250,7 +254,8 @@ def material_overview(material_id=None):
         if form.validate_on_submit():
             text = form.text.data
             with database.atomic() as transaction:
-                comment = COMMENT.create(Text=text, commented_material=material_id, author=curr_user.id)
+                comment = COMMENT.create(
+                    Text=text, commented_material=material_id, author=curr_user.id)
 
     return render_template('material.html',
                            material=material,
@@ -260,3 +265,68 @@ def material_overview(material_id=None):
                            comments_per_page=current_app.config["COMMENTS_PER_PAGE"],
                            form=form)
 
+
+@index_router.route('/material/<int:material_id>/reviews', methods=['GET', 'POST'])
+def material_reviews(material_id=None):
+    if (material_id is None) or (not MATERIAL.select().where(MATERIAL.id == material_id).exists()):
+        abort(404, "No such material exists!")
+
+    try:
+        # Retrieve the material from DB
+        # This object can be used in templates as material.<attribute_name>
+        material = (MATERIAL
+                    .select()
+                    .where(MATERIAL.id == material_id)
+                    .prefetch(ATTACHMENT,
+                              MATERIAL.tags.get_through_model(),
+                              MATERIAL.authors.get_through_model(),
+                              REVIEW
+                              )
+                    )[0]
+    except (MATERIAL.DoesNotExist, IndexError):
+        abort(404, "No such material exists!")
+        return
+
+    # Retrieving comment page number. It is 1 by default.
+    try:
+        page = int(request.args.get('page', 1))
+        if page < 1:
+            abort(400, description="The page number can't be less than 1")
+            return
+    except ValueError:
+        abort(404, description='Page is not found')
+        return
+
+    # Retrieve reviews on this material
+    reviews_all = (REVIEW
+                   .select()
+                   .join(USER, on=(REVIEW.author == USER.id))
+                   .where(REVIEW.reviewed_material == material_id)
+                   )
+
+    try:
+        rating_avg = sum([r.Rating for r in reviews_all])/reviews_all.count()
+    except ZeroDivisionError:
+        rating_avg = None
+
+    # Get the necessary slice
+    review_page = reviews_all.paginate(
+        page, current_app.config['REVIEWS_PER_PAGE'])
+
+    # Create pagination
+    pagination = Pagination(
+        per_page=current_app.config['COMMENTS_PER_PAGE'],
+        total=reviews_all.count(),
+        page=page,
+        bs_version=4,
+        record_name='Comments',
+        alignment='center'
+    )
+
+    return render_template('material_reviews.html',
+                           material=material,
+                           reviews=review_page,
+                           pagination=pagination,
+                           page=page,
+                           reviews_per_page=current_app.config["REVIEWS_PER_PAGE"],
+                           rating_avg=rating_avg)
