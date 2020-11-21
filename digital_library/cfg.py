@@ -6,6 +6,7 @@ SECRET_KEY = os.environ.get('SECRET_KEY', 'очень сложный ключ').
 
 MATERIALS_PER_PAGE = int(os.environ.get('MATERIALS_PER_PAGE', 4))  # TODO: is 4 for the moment, make it 20 after!
 COMMENTS_PER_PAGE = int(os.environ.get('COMMENTS_PER_PAGE', 3))  # TODO: is 3 for the moment, make it 20 after!
+REVIEWS_PER_PAGE = int(os.environ.get('REVIEWS_PER_PAGE', 2))  # TODO: is 2 for the moment, make it 10 after!
 
 # flask-login
 SESSION_PROTECTION = "strong"
