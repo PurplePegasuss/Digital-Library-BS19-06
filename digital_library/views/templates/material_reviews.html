@@ -74,7 +74,20 @@
             No attachments found
         {% endif %}
     </div>
-    {# Comment section part#}
+    {# Review form #}
+    {% if form %}
+    <div class = "container">
+        <form method="POST" action="">
+            <div class="form-group">
+                <label>{{ form.csrf_token }}</label>
+                {{ render_field(form.text) }}
+                {{ render_field(form.rating) }}
+            </div>
+            <button type="submit" class="button" >Post</button>
+        </form>
+    </div>
+    {% endif %}
+    {# Review section part#}
     <div class = "container">
         <div class="row mb-4">
         </div>

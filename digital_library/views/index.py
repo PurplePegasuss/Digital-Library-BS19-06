@@ -3,7 +3,7 @@ from flask import Blueprint, render_template, current_app, request, abort, redir
 from flask_login import login_required
 from flask_paginate import Pagination
 from digital_library.db import *
-from digital_library.views.forms import CommentForm
+from digital_library.views.forms import CommentForm, ReviewForm
 
 index_router = Blueprint('index', __name__, template_folder='templates')
 
@@ -267,6 +267,7 @@ def material_overview(material_id=None):
 
 
 @index_router.route('/material/<int:material_id>/reviews', methods=['GET', 'POST'])
+@login_required
 def material_reviews(material_id=None):
     if (material_id is None) or (not MATERIAL.select().where(MATERIAL.id == material_id).exists()):
         abort(404, "No such material exists!")
@@ -323,10 +324,24 @@ def material_reviews(material_id=None):
         alignment='center'
     )
 
+    form = None
+    if curr_user.is_authenticated:
+        form = ReviewForm()
+        if form.validate_on_submit():
+            text = form.text.data
+            rating = int(form.rating.data)
+            with database.atomic() as transaction:
+                review = REVIEW.create(
+                    Text=text,
+                    Rating=rating,
+                    reviewed_material=material_id,
+                    author=curr_user.id)
+
     return render_template('material_reviews.html',
                            material=material,
                            reviews=review_page,
                            pagination=pagination,
                            page=page,
                            reviews_per_page=current_app.config["REVIEWS_PER_PAGE"],
-                           rating_avg=rating_avg)
+                           rating_avg=rating_avg,
+                           form=form)
