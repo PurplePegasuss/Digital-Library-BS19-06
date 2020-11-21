@@ -4,7 +4,7 @@
 	<dd>{{ field(**kwargs)|safe }}
 		{% if field.errors %}
 			{% for error in field.errors %}
-			<div class="invalid-feedback text-danger">{{ error }}</div>
+			<div class="text-danger">{{ error }}</div>
 			{% endfor %}
 		{% endif %}
 	</dd>

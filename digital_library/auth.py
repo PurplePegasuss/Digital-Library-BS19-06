@@ -1,14 +1,16 @@
+import functools
 from hashlib import sha512
 from peewee import prefetch
 
 from .app import app
-from .db import USER, database
-from flask_login import LoginManager, login_user, logout_user, login_required
+from .cfg import ROOT_PASSWORD
+from .db import USER, database, ADMIN_RIGHTS
+from flask_login import LoginManager, login_user, logout_user, login_required, current_user
+from flask import abort
 
 from flask_wtf import FlaskForm
 from wtforms import StringField, PasswordField
 from wtforms.validators import InputRequired, Email, Length
-
 
 login_manager = LoginManager()
 login_manager.init_app(app=app)
@@ -80,3 +82,45 @@ def register(email: str, password: str, first_name: str = "anon", second_name: s
     login_user(user)
 
     return user
+
+
+permissions = [
+    'ADMIN',
+]
+
+
+def init_permissions():
+    with database.atomic():
+        root, _ = USER.get_or_create(Email='root@root.root')
+        root.FirstName = 'admin'
+        root.SecondName = 'root'
+        root.PasswordHash = _hash_password(ROOT_PASSWORD)
+
+        root.rights.clear()
+        for permission in permissions:
+            right, _ = ADMIN_RIGHTS.get_or_create(Description=permission)
+            root.rights.add(right)
+
+        root.save()
+
+
+init_permissions()
+
+
+def has_permission(permission: str):
+    if not current_user.is_authenticated:
+        return False
+    return permission in [x.Description for x in current_user.rights]
+
+
+def permission_required(permission: str):
+    def decorator(func):
+        @functools.wraps(func)
+        def wrapper(*args, **kwargs):
+            if has_permission(permission):
+                return func(*args, **kwargs)
+            abort(401, 'Unauthorized')
+
+        return wrapper
+
+    return decorator

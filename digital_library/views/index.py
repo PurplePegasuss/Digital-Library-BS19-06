@@ -1,4 +1,5 @@
 from flask import Blueprint, render_template, current_app, request, abort, redirect, url_for
+from flask_login import login_required
 from flask_paginate import Pagination
 from digital_library.db import *
 
@@ -6,6 +7,7 @@ index_router = Blueprint('index', __name__, template_folder='templates')
 
 
 @index_router.route('/')
+@login_required
 def index():
     # Retrieving material page number. It is 1 by default.
     try:
@@ -44,6 +46,7 @@ def index():
 
 
 @index_router.route('/search', methods=['GET', 'POST'])
+@login_required
 def search():
     # If a user presses the search button
     if request.method == 'POST':
@@ -191,6 +194,7 @@ def page_not_found(message):
 
 
 @index_router.route('/material/<int:material_id>')
+@login_required
 def material_overview(material_id=None):
     if (material_id is None) or (not MATERIAL.select().where(MATERIAL.id == material_id).exists()):
         abort(404, "No such material exists!")
