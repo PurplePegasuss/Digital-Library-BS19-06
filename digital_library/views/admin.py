@@ -58,7 +58,7 @@ class UploadFormView(AuthMixin, BaseView):
 
 def init_flask_admin(admin: Admin):
     admin_views = [
-        (x.admin_view or ModelView_Auth)(x) for x in tables if getattr(x, 'admin_view', None)
+        (x.admin_view or ModelView_Auth)(x) for x in tables if getattr(x, 'admin_view', False) != False
     ]
     admin_views.extend([
         UploadFormView(),
