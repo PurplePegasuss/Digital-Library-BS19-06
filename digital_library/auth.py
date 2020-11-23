@@ -17,15 +17,15 @@ login_manager.init_app(app=app)
 
 
 class LoginForm(FlaskForm):
-    email = StringField('email', validators=[InputRequired(), Email(message='Invalid email'), Length(max=50)])
-    password = PasswordField('password', validators=[InputRequired(), Length(min=8, max=80)])
+    email = StringField('Email', validators=[InputRequired(), Email(message='Invalid email'), Length(max=50)])
+    password = PasswordField('Password', validators=[InputRequired(), Length(min=8, max=80)])
 
 
 class RegisterForm(FlaskForm):
-    first_name = StringField('first_name', validators=[InputRequired(), Length(min=2, max=50)])
-    second_name = StringField('second_name', validators=[InputRequired(), Length(min=2, max=50)])
-    email = StringField('email', validators=[InputRequired(), Email(message='Invalid email'), Length(max=50)])
-    password = PasswordField('password', validators=[InputRequired(), Length(min=8, max=80)])
+    first_name = StringField('First Name', validators=[InputRequired(), Length(min=2, max=50)])
+    second_name = StringField('Second Name', validators=[InputRequired(), Length(min=2, max=50)])
+    email = StringField('Email', validators=[InputRequired(), Email(message='Invalid email'), Length(max=50)])
+    password = PasswordField('Password', validators=[InputRequired(), Length(min=8, max=80)])
 
 
 @login_manager.user_loader

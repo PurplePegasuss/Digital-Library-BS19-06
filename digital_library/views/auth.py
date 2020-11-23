@@ -16,7 +16,8 @@ def validate_login():
             login(email, password)
             return redirect(url_for('index.index'))
         except AuthException as e:
-            abort(400, description=str(e))
+            form.password.errors.append(str(e))
+            return render_template('login.html', form=form)
 
     return render_template('login.html', form=form)
 
@@ -32,7 +33,8 @@ def validate_register():
         try:
             register(email, password, first_name, second_name)
         except AuthException as e:
-            abort(400, description=str(e))
+            form.password.errors.append(str(e))
+            return render_template('login.html', form=form)
 
     return render_template('register.html', form=form)
 
