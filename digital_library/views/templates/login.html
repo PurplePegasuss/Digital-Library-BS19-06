@@ -1,0 +1,19 @@
+{% from "_formhelpers.html" import render_field %}
+{% extends '_page.html' %}
+{% block content %}
+    <form action='/login' method='POST'>
+        <div class="container">
+            {{ form.csrf_token }}
+            <div class="form-group">
+                {{ render_field(form.email) }}
+            </div>
+            <div class="form-group">
+                {{ render_field(form.password) }}
+            </div>
+            <button type="submit" class="registerbtn">Login</button>
+            <div class="container signin">
+                <p>Do not have an account? <a href={{ '/register' }}>Register</a>.</p>
+            </div>
+        </div>
+    </form>
+{% endblock %}

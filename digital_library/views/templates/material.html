@@ -1,0 +1,111 @@
+{% extends '_page.html' %}
+{% block content %}
+    {# Overview part #}
+    <div class="container" xmlns="http://www.w3.org/1999/html">
+        <p></p>
+        <div class="mb-4">
+            <div class="row">
+                <div class="sm-6" style="background-color:white;">
+                    <h5><span style="font-size: x-large; ">{{ material.Title }}</span></h5>
+                        <div>
+                            <h5 class="card-text text-secondary"><span style="font-size: medium; ">
+                                <strong>Tags</strong>:
+                                {% for tag in material.tags %}
+                                    <a href="/search?text=&tag={{ tag.Name }}" class="badge badge-pill bg-moodle">{{ tag.Name }}</a>
+                                {% endfor %}
+                            </span></h5>
+                            <h6><span style="font-size: medium; ">{{ material.Type }}</span></h6>
+                            <br />
+                            <h5><span style="font-size: large; "><strong>Description:</strong> {{ material.Description }}</span></h5>
+                            <h5 class="card-text text-secondary"><span style="font-size: medium; "><strong>Authors</strong>:
+                                {% for author in material.authors %}
+                                    {{author.FullName }};
+                                {% endfor %}
+                            </span></h5>
+                            <h5 class="card-text text-secondary"><span style="font-size: medium; ">
+                                <a class="button" href={{ url_for('index.material_reviews', material_id = material.id) }}>Reviews</a>
+                            </span></h5>
+                        </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    {# Attachment part #}
+    <div class="container" align="center">
+        {% if material.attachments|length %}
+            {% for attachment in material.attachments %}
+
+                {% if attachment.Type == "video" %}
+
+                    {% if "www.youtube.com" in attachment.Url %}
+
+                        {% if "www.youtube.com/embed/" in attachment.Url %}
+                            <div class="row h-100 justify-content-center" style="padding: 10px;">
+                                <iframe width="100%" height="600" align="middle" src={{ attachment.Url }} frameborder="0" allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture" allowfullscreen onload="autoResize(this);"></iframe>
+                            </div>
+                        {% endif %}
+
+                        {% if "www.youtube.com/watch?v=" in attachment.Url %}
+                            <div class="row h-100 justify-content-center" style="padding: 10px;">
+                            <iframe width="100%" height="600" align="middle" src={{ "https://www.youtube.com/embed/" + attachment.Url.split("=")[1] }} frameborder="0" allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture" allowfullscreen onload="autoResize(this);"></iframe>
+                            </div>
+                        {% endif %}
+
+                    {% endif %}
+
+                {% elif attachment.Type == "image" %}
+                    <div class="row justify-content-center" style="padding: 10px;">
+                        <img src={{ attachment.Url }} alt="image">
+                    </div>
+                {% else %}
+                    <div class="row justify-content-center">
+                        <a href={{ attachment.Url }} > Download {{ attachment.Type }} attachment</a>
+                    </div>
+                {% endif %}
+            {% endfor %}
+        {% else %}
+            No attachments found
+        {% endif %}
+    </div>
+    {# Comment section part#}
+    {% if form %}
+    <div class = "container">
+        <form method="POST" action="">
+            <div class="form-group">
+                <label>{{ form.csrf_token }}</label>
+                {{ render_field(form.text) }}
+            </div>
+            <button type="submit" class="button" >Post</button>
+        </form>
+    </div>
+    {% endif %}
+    <div class="container">
+        <div class="row">
+            {% for comment in comments %}
+                <div class="col-12">
+                    <div class="card d-flex mb-4 mt-4">
+                        <div class="card-body">
+                            {% if comment.author %}
+                                <p class="h6 text-secondary">
+                                    <img src="https://www.iconfinder.com/data/icons/metro-uinvert-dock/256/User_Accounts_alt.png" alt="User" height="25" width="25"/>
+                                    {{ comment.author.FullName }}
+                                </p>
+                            {% endif %}
+                            {% if comment.Text %}
+                                <p class="h5">{{ comment.Text }}</p>
+                            {% endif %}
+                        </div>
+                    </div>
+                </div>
+            {% endfor %}
+        </div>
+              <div class="row mt-4 mb-4">
+        </div>
+    </div>
+
+    {# Switcher between pages. #}
+    <br>
+    <br>
+    {{ pagination.links }}
+{% endblock %}

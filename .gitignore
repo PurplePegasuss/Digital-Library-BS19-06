@@ -1,0 +1,13 @@
+__PYCACHE__
+__pycache__
+*.pyc
+.idea
+.vscode
+
+/data/*
+!/data/static
+/data/static/uploads/*
+!.gitkeep
+/digital_library/static
+
+/venv

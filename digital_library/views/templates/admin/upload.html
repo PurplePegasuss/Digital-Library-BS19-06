@@ -1,0 +1,21 @@
+{% from "_formhelpers.html" import render_field %}
+{% extends 'admin/master.html' %}
+{% block body %}
+
+  <div class="container">
+    <ul>The list of files:
+      {%- for file in files -%}
+        <li><a href="{{ url_for('static', filename=file) }}">{{ file }}</a></li>
+      {%- endfor -%}
+    </ul>
+
+    <form method="POST" enctype="multipart/form-data">
+      <div class="form-group">
+        {{  form.csrf_token }}
+        {{ render_field(form.upload) }}
+      </div>
+
+      <button type="submit" class="btn btn-primary">Submit</button>
+    </form>
+  </div>
+{% endblock %}
